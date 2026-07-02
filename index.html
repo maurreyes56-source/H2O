@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title> H2O Power | Cierre ejecutivo concurso mayo-junio 2026</title>
+<title>H2O Power | Cierre ejecutivo concurso mayo-junio 2026</title>
 <style>
   :root{
     --bg:#120026;
@@ -243,8 +243,12 @@
 
   <section id="panel-rutas" class="mechanic-panel">
     <div class="card filter-band">
-      <div class="filter-copy"><strong>Filtros Rutas / Mostradores</strong><span>Supervisor y grupo comercial.</span></div>
-      <div class="controls" style="margin:0"><select id="routeSupervisorFilter" onchange="renderRoutes()"><option value="all">Todos los supervisores</option></select><select id="routeGroupFilter" onchange="renderRoutes()"><option value="all">Todos los grupos</option></select></div>
+      <div class="filter-copy"><strong>Filtros Rutas / Mostradores</strong><span>Supervisor, grupo comercial y vendedor.</span></div>
+      <div class="controls" style="margin:0">
+        <select id="routeSupervisorFilter" onchange="renderRoutes(true)"><option value="all">Todos los supervisores</option></select>
+        <select id="routeGroupFilter" onchange="renderRoutes(true)"><option value="all">Todos los grupos</option></select>
+        <select id="routeSellerFilter" onchange="renderRoutes(false)"><option value="all">Todos los vendedores</option></select>
+      </div>
     </div>
     <div class="mini-kpis">
       <div class="mini"><span>Vendedores</span><strong class="blue" id="rutMostradores"></strong></div>
@@ -274,12 +278,12 @@
     </table></div></div>
   </section>
 
-  <section class="section-head">
+  <section class="section-head" id="mixSection">
     <div>
-      <h2>Mix de sabores</h2>
-      <p>Venta y volumen equivalente por sabor.</p>
+      <h2 id="mixTitle">Mix de sabores · CA&amp;B</h2>
+      <p id="mixSubtitle">Venta y volumen por sabor según los filtros activos.</p>
     </div>
-    <span class="tag warn">Incluye mango maracuyá</span>
+    <span class="tag warn" id="mixTag">Vista CA&amp;B</span>
   </section>
   <div class="two-col">
     <div class="card"><div class="bars" id="barSabores"></div></div>
@@ -302,6 +306,9 @@ const piezasData = [{"Supervisor": "Omar", "GrupoTienda": "CONVENIENCIA", "Tiend
 const cabSupervisorData = [{"Supervisor": "Alicia", "Tiendas": 5, "TiendasLiberan": 5, "Piezas": 397.0, "Venta": 8314.93, "PagoCajeros": 397.0, "CoberturaPct": 1.0, "CajasEquiv": 16.5416666667, "BolsaA": 278, "BolsaB": 328, "BolsaC": 303}, {"Supervisor": "Erick", "Tiendas": 11, "TiendasLiberan": 6, "Piezas": 367.0, "Venta": 9100.71, "PagoCajeros": 277.0, "CoberturaPct": 0.5454545455, "CajasEquiv": 15.2916666667, "BolsaA": 333, "BolsaB": 303, "BolsaC": 318}, {"Supervisor": "Omar", "Tiendas": 18, "TiendasLiberan": 16, "Piezas": 1053.0, "Venta": 24490.79, "PagoCajeros": 1034.0, "CoberturaPct": 0.8888888889, "CajasEquiv": 43.875, "BolsaA": 889, "BolsaB": 869, "BolsaC": 879}];
 const cajasData = [{"Supervisor": "Clarissa", "Tienda": "BODEGA LA GUADALUPANA", "Grupo": "SURTETODO", "Vendedor": "VF10 - SURTE TODO FORANEO", "Venta": 6215.51, "Cajas": 18.0, "CumpleVendedor": false, "PagoVendedor": 0.0}, {"Supervisor": "Clarissa", "Tienda": "BODEGA LA GUADALUPANA", "Grupo": "AGENTES", "Vendedor": "VF02 - GREGORIO LIMONES HERNANDEZ", "Venta": 3165.52, "Cajas": 11.0, "CumpleVendedor": false, "PagoVendedor": 0.0}, {"Supervisor": "Clarissa", "Tienda": "BODEGA LA GUADALUPANA", "Grupo": "AGENTES", "Vendedor": "VF06 - WILLIAM BAUTISTA HERNANDEZ", "Venta": 924.16, "Cajas": 5.0, "CumpleVendedor": false, "PagoVendedor": 0.0}, {"Supervisor": "Alicia", "Tienda": "DIVITSA IV", "Grupo": "CAJERO", "Vendedor": "T25C1 - ERIKA HERNANDEZ ALAVEZ", "Venta": 589.65, "Cajas": 2.75, "CumpleVendedor": false, "PagoVendedor": 0.0}, {"Supervisor": "Alicia", "Tienda": "DIVITSA III", "Grupo": "CAJERO", "Vendedor": "T26C4 - JULIETA SANTIAGO DELGADO", "Venta": 850.86, "Cajas": 2.0, "CumpleVendedor": false, "PagoVendedor": 0.0}, {"Supervisor": "Alicia", "Tienda": "DIVITSA I", "Grupo": "CAJERO", "Vendedor": "T01M5 - MARIBEL RAMIREZ SANCHEZ", "Venta": 891.38, "Cajas": 2.0, "CumpleVendedor": false, "PagoVendedor": 0.0}, {"Supervisor": "Clarissa", "Tienda": "BODEGA LA GUADALUPANA", "Grupo": "SURTETODO", "Vendedor": "VF13 - SURTE TODO FORANEO 2", "Venta": 206.9, "Cajas": 2.0, "CumpleVendedor": false, "PagoVendedor": 0.0}, {"Supervisor": "Alicia", "Tienda": "DIVITSA I", "Grupo": "CAJERO", "Vendedor": "T01M9 - MERCEDES CRUZ GALLEGOS", "Venta": 455.18, "Cajas": 1.0, "CumpleVendedor": false, "PagoVendedor": 0.0}, {"Supervisor": "Alicia", "Tienda": "DIVITSA I", "Grupo": "TELEMARKETING", "Vendedor": "VM07 - SURTE TODO LOCAL 2", "Venta": 455.18, "Cajas": 1.0, "CumpleVendedor": false, "PagoVendedor": 0.0}, {"Supervisor": "Alicia", "Tienda": "DIVITSA II", "Grupo": "CAJERO", "Vendedor": "T08C8 - YUVIA ITZEL FRANCO AGUILAR", "Venta": 227.59, "Cajas": 0.5, "CumpleVendedor": false, "PagoVendedor": 0.0}];
 const routeSupervisorData = [{"Supervisor": "Alicia", "Equipo": 6, "Cumplen": 0, "Cajas": 9.25, "Venta": 3469.84, "PagoVendedor": 0.0, "CoberturaPct": 0.0, "LiberaSupervisor": false, "PagoSupervisor": 0.0}, {"Supervisor": "Clarissa", "Equipo": 4, "Cumplen": 0, "Cajas": 36.0, "Venta": 10512.09, "PagoVendedor": 0.0, "CoberturaPct": 0.0, "LiberaSupervisor": false, "PagoSupervisor": 0.0}];
+const cabFlavorRows = [{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"VIGS CACAHUATEPEC","Vendedor":"","Sabor":"Mora azul","Venta":44.82,"Piezas":2.0,"Cajas":0.0,"CajasEquiv":0.08333333333333333},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"VIGS CACAHUATEPEC","Vendedor":"","Sabor":"Frutos rojos","Venta":67.23,"Piezas":3.0,"Cajas":0.0,"CajasEquiv":0.125},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"VIGS CACAHUATEPEC","Vendedor":"","Sabor":"Frutos cítricos","Venta":67.23,"Piezas":3.0,"Cajas":0.0,"CajasEquiv":0.125},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"VIGS CACAHUATEPEC","Vendedor":"","Sabor":"Mango maracuyá","Venta":51.72,"Piezas":2.0,"Cajas":0.0,"CajasEquiv":0.08333333333333333},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"VIGS HACIENDA","Vendedor":"","Sabor":"Mora azul","Venta":224.11,"Piezas":10.0,"Cajas":0.0,"CajasEquiv":0.4166666666666667},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"VIGS HACIENDA","Vendedor":"","Sabor":"Frutos rojos","Venta":336.18,"Piezas":15.0,"Cajas":0.0,"CajasEquiv":0.625},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"VIGS HACIENDA","Vendedor":"","Sabor":"Frutos cítricos","Venta":246.51,"Piezas":11.0,"Cajas":0.0,"CajasEquiv":0.4583333333333333},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"VIGS HACIENDA","Vendedor":"","Sabor":"Frutos verdes","Venta":291.33,"Piezas":13.0,"Cajas":0.0,"CajasEquiv":0.5416666666666666},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"VIGS HACIENDA","Vendedor":"","Sabor":"Mango maracuyá","Venta":413.76,"Piezas":16.0,"Cajas":0.0,"CajasEquiv":0.6666666666666666},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"COMERCIAL MENUDEO","Vendedor":"","Sabor":"Mora azul","Venta":268.93,"Piezas":12.0,"Cajas":0.0,"CajasEquiv":0.5},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"COMERCIAL MENUDEO","Vendedor":"","Sabor":"Frutos rojos","Venta":246.51,"Piezas":11.0,"Cajas":0.0,"CajasEquiv":0.4583333333333333},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"COMERCIAL MENUDEO","Vendedor":"","Sabor":"Frutos cítricos","Venta":201.69,"Piezas":9.0,"Cajas":0.0,"CajasEquiv":0.375},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"COMERCIAL MENUDEO","Vendedor":"","Sabor":"Frutos verdes","Venta":224.1,"Piezas":10.0,"Cajas":0.0,"CajasEquiv":0.4166666666666667},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"COMERCIAL MENUDEO","Vendedor":"","Sabor":"Mango maracuyá","Venta":103.44,"Piezas":4.0,"Cajas":0.0,"CajasEquiv":0.16666666666666666},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"VIGS CENTRAL","Vendedor":"","Sabor":"Mora azul","Venta":201.69,"Piezas":9.0,"Cajas":0.0,"CajasEquiv":0.375},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"VIGS CENTRAL","Vendedor":"","Sabor":"Frutos rojos","Venta":179.29,"Piezas":8.0,"Cajas":0.0,"CajasEquiv":0.3333333333333333},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"VIGS CENTRAL","Vendedor":"","Sabor":"Frutos cítricos","Venta":246.51,"Piezas":11.0,"Cajas":0.0,"CajasEquiv":0.4583333333333333},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"VIGS CENTRAL","Vendedor":"","Sabor":"Frutos verdes","Venta":134.46,"Piezas":6.0,"Cajas":0.0,"CajasEquiv":0.25},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"VIGS CENTRAL","Vendedor":"","Sabor":"Mango maracuyá","Venta":77.58,"Piezas":3.0,"Cajas":0.0,"CajasEquiv":0.125},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"VIGS CBTA","Vendedor":"","Sabor":"Mora azul","Venta":515.43,"Piezas":23.0,"Cajas":0.0,"CajasEquiv":0.9583333333333334},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"VIGS CBTA","Vendedor":"","Sabor":"Frutos rojos","Venta":605.09,"Piezas":27.0,"Cajas":0.0,"CajasEquiv":1.125},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"VIGS CBTA","Vendedor":"","Sabor":"Frutos cítricos","Venta":313.74,"Piezas":14.0,"Cajas":0.0,"CajasEquiv":0.5833333333333334},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"VIGS CBTA","Vendedor":"","Sabor":"Mango maracuyá","Venta":387.9,"Piezas":15.0,"Cajas":0.0,"CajasEquiv":0.625},{"Supervisor":"Erick","Grupo":"ABASTO","Tienda":"VIGS PUERTO CENTRAL","Vendedor":"","Sabor":"Mora azul","Venta":24.14,"Piezas":1.0,"Cajas":0.0,"CajasEquiv":0.041666666666666664},{"Supervisor":"Erick","Grupo":"ABASTO","Tienda":"VIGS PUERTO CENTRAL","Vendedor":"","Sabor":"Frutos rojos","Venta":117.24,"Piezas":5.0,"Cajas":0.0,"CajasEquiv":0.20833333333333334},{"Supervisor":"Erick","Grupo":"ABASTO","Tienda":"VIGS PUERTO CENTRAL","Vendedor":"","Sabor":"Frutos cítricos","Venta":144.84,"Piezas":6.0,"Cajas":0.0,"CajasEquiv":0.25},{"Supervisor":"Erick","Grupo":"ABASTO","Tienda":"VIGS PUERTO CENTRAL","Vendedor":"","Sabor":"Frutos verdes","Venta":93.1,"Piezas":4.0,"Cajas":0.0,"CajasEquiv":0.16666666666666666},{"Supervisor":"Erick","Grupo":"ABASTO","Tienda":"VIGS PUERTO CENTRAL","Vendedor":"","Sabor":"Mango maracuyá","Venta":53.45,"Piezas":2.0,"Cajas":0.0,"CajasEquiv":0.08333333333333333},{"Supervisor":"Erick","Grupo":"ABASTO","Tienda":"VIGS RIO GRANDE","Vendedor":"","Sabor":"Mora azul","Venta":308.62,"Piezas":13.0,"Cajas":0.0,"CajasEquiv":0.5416666666666666},{"Supervisor":"Erick","Grupo":"ABASTO","Tienda":"VIGS RIO GRANDE","Vendedor":"","Sabor":"Frutos rojos","Venta":281.03,"Piezas":12.0,"Cajas":0.0,"CajasEquiv":0.5},{"Supervisor":"Erick","Grupo":"ABASTO","Tienda":"VIGS RIO GRANDE","Vendedor":"","Sabor":"Frutos cítricos","Venta":237.94,"Piezas":10.0,"Cajas":0.0,"CajasEquiv":0.4166666666666667},{"Supervisor":"Erick","Grupo":"ABASTO","Tienda":"VIGS RIO GRANDE","Vendedor":"","Sabor":"Frutos verdes","Venta":141.38,"Piezas":6.0,"Cajas":0.0,"CajasEquiv":0.25},{"Supervisor":"Erick","Grupo":"ABASTO","Tienda":"VIGS RIO GRANDE","Vendedor":"","Sabor":"Mango maracuyá","Venta":244.85,"Piezas":9.0,"Cajas":0.0,"CajasEquiv":0.375},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"VIGS 5 DE MAYO","Vendedor":"","Sabor":"Mora azul","Venta":291.35,"Piezas":13.0,"Cajas":0.0,"CajasEquiv":0.5416666666666666},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"VIGS 5 DE MAYO","Vendedor":"","Sabor":"Frutos rojos","Venta":224.11,"Piezas":10.0,"Cajas":0.0,"CajasEquiv":0.4166666666666667},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"VIGS 5 DE MAYO","Vendedor":"","Sabor":"Frutos cítricos","Venta":224.1,"Piezas":10.0,"Cajas":0.0,"CajasEquiv":0.4166666666666667},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"VIGS 5 DE MAYO","Vendedor":"","Sabor":"Frutos verdes","Venta":67.23,"Piezas":3.0,"Cajas":0.0,"CajasEquiv":0.125},{"Supervisor":"Omar","Grupo":"ABASTO","Tienda":"VIGS 5 DE MAYO","Vendedor":"","Sabor":"Mango maracuyá","Venta":387.9,"Piezas":15.0,"Cajas":0.0,"CajasEquiv":0.625},{"Supervisor":"Erick","Grupo":"ABASTO","Tienda":"VIGS SAN JOSE DEL PROGRESO","Vendedor":"","Sabor":"Mora azul","Venta":44.82,"Piezas":2.0,"Cajas":0.0,"CajasEquiv":0.08333333333333333},{"Supervisor":"Erick","Grupo":"ABASTO","Tienda":"VIGS SAN JOSE DEL PROGRESO","Vendedor":"","Sabor":"Frutos rojos","Venta":44.82,"Piezas":2.0,"Cajas":0.0,"CajasEquiv":0.08333333333333333},{"Supervisor":"Erick","Grupo":"ABASTO","Tienda":"VIGS SAN JOSE DEL PROGRESO","Vendedor":"","Sabor":"Frutos cítricos","Venta":44.82,"Piezas":2.0,"Cajas":0.0,"CajasEquiv":0.08333333333333333},{"Supervisor":"Erick","Grupo":"ABASTO","Tienda":"VIGS SAN JOSE DEL PROGRESO","Vendedor":"","Sabor":"Frutos verdes","Venta":44.82,"Piezas":2.0,"Cajas":0.0,"CajasEquiv":0.08333333333333333},{"Supervisor":"Erick","Grupo":"ABASTO","Tienda":"VIGS SAN JOSE DEL PROGRESO","Vendedor":"","Sabor":"Mango maracuyá","Venta":77.58,"Piezas":3.0,"Cajas":0.0,"CajasEquiv":0.125},{"Supervisor":"Alicia","Grupo":"AUTOSERVICIO","Tienda":"VIGS PLAZA MERCADO","Vendedor":"","Sabor":"Mora azul","Venta":246.51,"Piezas":11.0,"Cajas":0.0,"CajasEquiv":0.4583333333333333},{"Supervisor":"Alicia","Grupo":"AUTOSERVICIO","Tienda":"VIGS PLAZA MERCADO","Vendedor":"","Sabor":"Frutos rojos","Venta":336.15,"Piezas":15.0,"Cajas":0.0,"CajasEquiv":0.625},{"Supervisor":"Alicia","Grupo":"AUTOSERVICIO","Tienda":"VIGS PLAZA MERCADO","Vendedor":"","Sabor":"Frutos cítricos","Venta":156.87,"Piezas":7.0,"Cajas":0.0,"CajasEquiv":0.2916666666666667},{"Supervisor":"Alicia","Grupo":"AUTOSERVICIO","Tienda":"VIGS PLAZA MERCADO","Vendedor":"","Sabor":"Frutos verdes","Venta":336.15,"Piezas":15.0,"Cajas":0.0,"CajasEquiv":0.625},{"Supervisor":"Alicia","Grupo":"AUTOSERVICIO","Tienda":"VIGS PLAZA MERCADO","Vendedor":"","Sabor":"Mango maracuyá","Venta":387.9,"Piezas":15.0,"Cajas":0.0,"CajasEquiv":0.625},{"Supervisor":"Alicia","Grupo":"AUTOSERVICIO BASICO","Tienda":"VIGS BASICO OMETEPEC","Vendedor":"","Sabor":"Mora azul","Venta":22.41,"Piezas":1.0,"Cajas":0.0,"CajasEquiv":0.041666666666666664},{"Supervisor":"Alicia","Grupo":"AUTOSERVICIO BASICO","Tienda":"VIGS BASICO OMETEPEC","Vendedor":"","Sabor":"Frutos rojos","Venta":1080.15,"Piezas":56.0,"Cajas":0.0,"CajasEquiv":2.3333333333333335},{"Supervisor":"Alicia","Grupo":"AUTOSERVICIO BASICO","Tienda":"VIGS BASICO OMETEPEC","Vendedor":"","Sabor":"Frutos cítricos","Venta":785.33,"Piezas":41.0,"Cajas":0.0,"CajasEquiv":1.7083333333333333},{"Supervisor":"Alicia","Grupo":"AUTOSERVICIO BASICO","Tienda":"VIGS BASICO OMETEPEC","Vendedor":"","Sabor":"Mango maracuyá","Venta":336.2,"Piezas":16.0,"Cajas":0.0,"CajasEquiv":0.6666666666666666},{"Supervisor":"Alicia","Grupo":"AUTOSERVICIO BASICO","Tienda":"VIGS BASICO JAMILTEPEC","Vendedor":"","Sabor":"Mora azul","Venta":358.58,"Piezas":16.0,"Cajas":0.0,"CajasEquiv":0.6666666666666666},{"Supervisor":"Alicia","Grupo":"AUTOSERVICIO BASICO","Tienda":"VIGS BASICO JAMILTEPEC","Vendedor":"","Sabor":"Frutos rojos","Venta":563.74,"Piezas":27.0,"Cajas":0.0,"CajasEquiv":1.125},{"Supervisor":"Alicia","Grupo":"AUTOSERVICIO BASICO","Tienda":"VIGS BASICO JAMILTEPEC","Vendedor":"","Sabor":"Frutos cítricos","Venta":224.1,"Piezas":10.0,"Cajas":0.0,"CajasEquiv":0.4166666666666667},{"Supervisor":"Alicia","Grupo":"AUTOSERVICIO BASICO","Tienda":"VIGS BASICO JAMILTEPEC","Vendedor":"","Sabor":"Frutos verdes","Venta":403.38,"Piezas":18.0,"Cajas":0.0,"CajasEquiv":0.75},{"Supervisor":"Alicia","Grupo":"AUTOSERVICIO BASICO","Tienda":"VIGS BASICO JAMILTEPEC","Vendedor":"","Sabor":"Mango maracuyá","Venta":336.18,"Piezas":13.0,"Cajas":0.0,"CajasEquiv":0.5416666666666666},{"Supervisor":"Alicia","Grupo":"AUTOSERVICIO BASICO","Tienda":"VIGS BASICO CUAJI","Vendedor":"","Sabor":"Mora azul","Venta":1102.57,"Piezas":57.0,"Cajas":0.0,"CajasEquiv":2.375},{"Supervisor":"Alicia","Grupo":"AUTOSERVICIO BASICO","Tienda":"VIGS BASICO CUAJI","Vendedor":"","Sabor":"Frutos rojos","Venta":586.18,"Piezas":28.0,"Cajas":0.0,"CajasEquiv":1.1666666666666667},{"Supervisor":"Alicia","Grupo":"AUTOSERVICIO BASICO","Tienda":"VIGS BASICO CUAJI","Vendedor":"","Sabor":"Frutos cítricos","Venta":291.34,"Piezas":13.0,"Cajas":0.0,"CajasEquiv":0.5416666666666666},{"Supervisor":"Alicia","Grupo":"AUTOSERVICIO BASICO","Tienda":"VIGS BASICO CUAJI","Vendedor":"","Sabor":"Frutos verdes","Venta":22.41,"Piezas":1.0,"Cajas":0.0,"CajasEquiv":0.041666666666666664},{"Supervisor":"Alicia","Grupo":"AUTOSERVICIO BASICO","Tienda":"VIGS BASICO CUAJI","Vendedor":"","Sabor":"Mango maracuyá","Venta":142.24,"Piezas":7.0,"Cajas":0.0,"CajasEquiv":0.2916666666666667},{"Supervisor":"Alicia","Grupo":"AUTOSERVICIO BASICO","Tienda":"VIGS BASICO PUERTO ESCONDIDO","Vendedor":"","Sabor":"Mora azul","Venta":44.82,"Piezas":2.0,"Cajas":0.0,"CajasEquiv":0.08333333333333333},{"Supervisor":"Alicia","Grupo":"AUTOSERVICIO BASICO","Tienda":"VIGS BASICO PUERTO ESCONDIDO","Vendedor":"","Sabor":"Frutos rojos","Venta":250.0,"Piezas":13.0,"Cajas":0.0,"CajasEquiv":0.5416666666666666},{"Supervisor":"Alicia","Grupo":"AUTOSERVICIO BASICO","Tienda":"VIGS BASICO PUERTO ESCONDIDO","Vendedor":"","Sabor":"Frutos cítricos","Venta":250.0,"Piezas":13.0,"Cajas":0.0,"CajasEquiv":0.5416666666666666},{"Supervisor":"Alicia","Grupo":"AUTOSERVICIO BASICO","Tienda":"VIGS BASICO PUERTO ESCONDIDO","Vendedor":"","Sabor":"Mango maracuyá","Venta":51.72,"Piezas":2.0,"Cajas":0.0,"CajasEquiv":0.08333333333333333},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS MENUDEO","Vendedor":"","Sabor":"Mora azul","Venta":694.77,"Piezas":31.0,"Cajas":0.0,"CajasEquiv":1.2916666666666667},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS MENUDEO","Vendedor":"","Sabor":"Frutos rojos","Venta":627.55,"Piezas":28.0,"Cajas":0.0,"CajasEquiv":1.1666666666666667},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS MENUDEO","Vendedor":"","Sabor":"Frutos cítricos","Venta":470.62,"Piezas":21.0,"Cajas":0.0,"CajasEquiv":0.875},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS MENUDEO","Vendedor":"","Sabor":"Frutos verdes","Venta":403.4,"Piezas":18.0,"Cajas":0.0,"CajasEquiv":0.75},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS MENUDEO","Vendedor":"","Sabor":"Mango maracuyá","Venta":310.32,"Piezas":12.0,"Cajas":0.0,"CajasEquiv":0.5},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS SAN ANTONIO","Vendedor":"","Sabor":"Mora azul","Venta":739.54,"Piezas":33.0,"Cajas":0.0,"CajasEquiv":1.375},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS SAN ANTONIO","Vendedor":"","Sabor":"Frutos rojos","Venta":739.56,"Piezas":33.0,"Cajas":0.0,"CajasEquiv":1.375},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS SAN ANTONIO","Vendedor":"","Sabor":"Frutos cítricos","Venta":358.57,"Piezas":16.0,"Cajas":0.0,"CajasEquiv":0.6666666666666666},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS SAN ANTONIO","Vendedor":"","Sabor":"Frutos verdes","Venta":403.41,"Piezas":18.0,"Cajas":0.0,"CajasEquiv":0.75},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS SAN ANTONIO","Vendedor":"","Sabor":"Mango maracuyá","Venta":749.94,"Piezas":29.0,"Cajas":0.0,"CajasEquiv":1.2083333333333333},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS ALBOMONCI","Vendedor":"","Sabor":"Mora azul","Venta":224.1,"Piezas":10.0,"Cajas":0.0,"CajasEquiv":0.4166666666666667},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS ALBOMONCI","Vendedor":"","Sabor":"Frutos rojos","Venta":156.87,"Piezas":7.0,"Cajas":0.0,"CajasEquiv":0.2916666666666667},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS ALBOMONCI","Vendedor":"","Sabor":"Frutos cítricos","Venta":156.87,"Piezas":7.0,"Cajas":0.0,"CajasEquiv":0.2916666666666667},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS ALBOMONCI","Vendedor":"","Sabor":"Mango maracuyá","Venta":77.58,"Piezas":3.0,"Cajas":0.0,"CajasEquiv":0.125},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS PUERTO I","Vendedor":"","Sabor":"Mora azul","Venta":265.54,"Piezas":11.0,"Cajas":0.0,"CajasEquiv":0.4583333333333333},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS PUERTO I","Vendedor":"","Sabor":"Frutos rojos","Venta":217.26,"Piezas":9.0,"Cajas":0.0,"CajasEquiv":0.375},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS PUERTO I","Vendedor":"","Sabor":"Frutos cítricos","Venta":120.7,"Piezas":5.0,"Cajas":0.0,"CajasEquiv":0.20833333333333334},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS PUERTO I","Vendedor":"","Sabor":"Frutos verdes","Venta":217.26,"Piezas":9.0,"Cajas":0.0,"CajasEquiv":0.375},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS PUERTO I","Vendedor":"","Sabor":"Mango maracuyá","Venta":193.13,"Piezas":7.0,"Cajas":0.0,"CajasEquiv":0.2916666666666667},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS JAMILTEPEC","Vendedor":"","Sabor":"Mora azul","Venta":241.4,"Piezas":10.0,"Cajas":0.0,"CajasEquiv":0.4166666666666667},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS JAMILTEPEC","Vendedor":"","Sabor":"Frutos rojos","Venta":893.18,"Piezas":37.0,"Cajas":0.0,"CajasEquiv":1.5416666666666667},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS JAMILTEPEC","Vendedor":"","Sabor":"Frutos cítricos","Venta":1182.86,"Piezas":49.0,"Cajas":0.0,"CajasEquiv":2.0416666666666665},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS JAMILTEPEC","Vendedor":"","Sabor":"Frutos verdes","Venta":482.8,"Piezas":20.0,"Cajas":0.0,"CajasEquiv":0.8333333333333334},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS JAMILTEPEC","Vendedor":"","Sabor":"Mango maracuyá","Venta":386.25,"Piezas":14.0,"Cajas":0.0,"CajasEquiv":0.5833333333333334},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS CUAJI","Vendedor":"","Sabor":"Mora azul","Venta":529.28,"Piezas":23.0,"Cajas":0.0,"CajasEquiv":0.9583333333333334},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS CUAJI","Vendedor":"","Sabor":"Frutos rojos","Venta":184.47,"Piezas":8.0,"Cajas":0.0,"CajasEquiv":0.3333333333333333},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS CUAJI","Vendedor":"","Sabor":"Frutos cítricos","Venta":113.78,"Piezas":5.0,"Cajas":0.0,"CajasEquiv":0.20833333333333334},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS CUAJI","Vendedor":"","Sabor":"Frutos verdes","Venta":189.66,"Piezas":8.0,"Cajas":0.0,"CajasEquiv":0.3333333333333333},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS CUAJI","Vendedor":"","Sabor":"Mango maracuyá","Venta":103.44,"Piezas":4.0,"Cajas":0.0,"CajasEquiv":0.16666666666666666},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS MARQUELIA","Vendedor":"","Sabor":"Mora azul","Venta":201.69,"Piezas":9.0,"Cajas":0.0,"CajasEquiv":0.375},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS MARQUELIA","Vendedor":"","Sabor":"Frutos rojos","Venta":44.82,"Piezas":2.0,"Cajas":0.0,"CajasEquiv":0.08333333333333333},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS MARQUELIA","Vendedor":"","Sabor":"Frutos cítricos","Venta":179.28,"Piezas":8.0,"Cajas":0.0,"CajasEquiv":0.3333333333333333},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS MARQUELIA","Vendedor":"","Sabor":"Frutos verdes","Venta":22.41,"Piezas":1.0,"Cajas":0.0,"CajasEquiv":0.041666666666666664},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS MARQUELIA","Vendedor":"","Sabor":"Mango maracuyá","Venta":129.3,"Piezas":5.0,"Cajas":0.0,"CajasEquiv":0.20833333333333334},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS PUERTO II","Vendedor":"","Sabor":"Mora azul","Venta":193.12,"Piezas":8.0,"Cajas":0.0,"CajasEquiv":0.3333333333333333},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS PUERTO II","Vendedor":"","Sabor":"Frutos rojos","Venta":168.98,"Piezas":7.0,"Cajas":0.0,"CajasEquiv":0.2916666666666667},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS PUERTO II","Vendedor":"","Sabor":"Frutos cítricos","Venta":168.98,"Piezas":7.0,"Cajas":0.0,"CajasEquiv":0.2916666666666667},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS PUERTO II","Vendedor":"","Sabor":"Frutos verdes","Venta":217.26,"Piezas":9.0,"Cajas":0.0,"CajasEquiv":0.375},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS PUERTO II","Vendedor":"","Sabor":"Mango maracuyá","Venta":137.95,"Piezas":5.0,"Cajas":0.0,"CajasEquiv":0.20833333333333334},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS TONAMECA","Vendedor":"","Sabor":"Mora azul","Venta":96.56,"Piezas":4.0,"Cajas":0.0,"CajasEquiv":0.16666666666666666},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS TONAMECA","Vendedor":"","Sabor":"Frutos rojos","Venta":168.98,"Piezas":7.0,"Cajas":0.0,"CajasEquiv":0.2916666666666667},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS TONAMECA","Vendedor":"","Sabor":"Frutos cítricos","Venta":72.42,"Piezas":3.0,"Cajas":0.0,"CajasEquiv":0.125},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS TONAMECA","Vendedor":"","Sabor":"Frutos verdes","Venta":24.14,"Piezas":1.0,"Cajas":0.0,"CajasEquiv":0.041666666666666664},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS TONAMECA","Vendedor":"","Sabor":"Mango maracuyá","Venta":55.18,"Piezas":2.0,"Cajas":0.0,"CajasEquiv":0.08333333333333333},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS GAVIOTAS","Vendedor":"","Sabor":"Mora azul","Venta":448.23,"Piezas":20.0,"Cajas":0.0,"CajasEquiv":0.8333333333333334},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS GAVIOTAS","Vendedor":"","Sabor":"Frutos rojos","Venta":784.37,"Piezas":35.0,"Cajas":0.0,"CajasEquiv":1.4583333333333333},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS GAVIOTAS","Vendedor":"","Sabor":"Frutos cítricos","Venta":470.61,"Piezas":21.0,"Cajas":0.0,"CajasEquiv":0.875},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS GAVIOTAS","Vendedor":"","Sabor":"Mango maracuyá","Venta":155.16,"Piezas":6.0,"Cajas":0.0,"CajasEquiv":0.25},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS ALVARO CARRILLO","Vendedor":"","Sabor":"Mora azul","Venta":112.05,"Piezas":5.0,"Cajas":0.0,"CajasEquiv":0.20833333333333334},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS ALVARO CARRILLO","Vendedor":"","Sabor":"Frutos rojos","Venta":134.47,"Piezas":6.0,"Cajas":0.0,"CajasEquiv":0.25},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS ALVARO CARRILLO","Vendedor":"","Sabor":"Frutos cítricos","Venta":112.05,"Piezas":5.0,"Cajas":0.0,"CajasEquiv":0.20833333333333334},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS ALVARO CARRILLO","Vendedor":"","Sabor":"Mango maracuyá","Venta":232.74,"Piezas":9.0,"Cajas":0.0,"CajasEquiv":0.375},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS LIBRAMIENTO","Vendedor":"","Sabor":"Mora azul","Venta":761.95,"Piezas":34.0,"Cajas":0.0,"CajasEquiv":1.4166666666666667},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS LIBRAMIENTO","Vendedor":"","Sabor":"Frutos rojos","Venta":425.79,"Piezas":19.0,"Cajas":0.0,"CajasEquiv":0.7916666666666666},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS LIBRAMIENTO","Vendedor":"","Sabor":"Frutos cítricos","Venta":224.1,"Piezas":10.0,"Cajas":0.0,"CajasEquiv":0.4166666666666667},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS LIBRAMIENTO","Vendedor":"","Sabor":"Frutos verdes","Venta":268.93,"Piezas":12.0,"Cajas":0.0,"CajasEquiv":0.5},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS LIBRAMIENTO","Vendedor":"","Sabor":"Mango maracuyá","Venta":698.22,"Piezas":27.0,"Cajas":0.0,"CajasEquiv":1.125},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS AVENIDA JUAREZ","Vendedor":"","Sabor":"Mora azul","Venta":224.11,"Piezas":10.0,"Cajas":0.0,"CajasEquiv":0.4166666666666667},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS AVENIDA JUAREZ","Vendedor":"","Sabor":"Frutos rojos","Venta":291.33,"Piezas":13.0,"Cajas":0.0,"CajasEquiv":0.5416666666666666},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS AVENIDA JUAREZ","Vendedor":"","Sabor":"Frutos cítricos","Venta":156.87,"Piezas":7.0,"Cajas":0.0,"CajasEquiv":0.2916666666666667},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS AVENIDA JUAREZ","Vendedor":"","Sabor":"Mango maracuyá","Venta":206.88,"Piezas":8.0,"Cajas":0.0,"CajasEquiv":0.3333333333333333},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS ZICATELA","Vendedor":"","Sabor":"Mora azul","Venta":144.84,"Piezas":6.0,"Cajas":0.0,"CajasEquiv":0.25},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS ZICATELA","Vendedor":"","Sabor":"Frutos rojos","Venta":289.68,"Piezas":12.0,"Cajas":0.0,"CajasEquiv":0.5},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS ZICATELA","Vendedor":"","Sabor":"Frutos cítricos","Venta":96.56,"Piezas":4.0,"Cajas":0.0,"CajasEquiv":0.16666666666666666},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS ZICATELA","Vendedor":"","Sabor":"Frutos verdes","Venta":120.7,"Piezas":5.0,"Cajas":0.0,"CajasEquiv":0.20833333333333334},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS ZICATELA","Vendedor":"","Sabor":"Mango maracuyá","Venta":358.67,"Piezas":13.0,"Cajas":0.0,"CajasEquiv":0.5416666666666666},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS BOULEVARD","Vendedor":"","Sabor":"Mora azul","Venta":337.96,"Piezas":14.0,"Cajas":0.0,"CajasEquiv":0.5833333333333334},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS BOULEVARD","Vendedor":"","Sabor":"Frutos rojos","Venta":168.98,"Piezas":7.0,"Cajas":0.0,"CajasEquiv":0.2916666666666667},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS BOULEVARD","Vendedor":"","Sabor":"Frutos cítricos","Venta":410.37,"Piezas":17.0,"Cajas":0.0,"CajasEquiv":0.7083333333333334},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS BOULEVARD","Vendedor":"","Sabor":"Frutos verdes","Venta":217.26,"Piezas":9.0,"Cajas":0.0,"CajasEquiv":0.375},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS BOULEVARD","Vendedor":"","Sabor":"Mango maracuyá","Venta":358.67,"Piezas":13.0,"Cajas":0.0,"CajasEquiv":0.5416666666666666},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS PUERTO MERCADO","Vendedor":"","Sabor":"Mora azul","Venta":24.14,"Piezas":1.0,"Cajas":0.0,"CajasEquiv":0.041666666666666664},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS PUERTO MERCADO","Vendedor":"","Sabor":"Frutos rojos","Venta":96.56,"Piezas":4.0,"Cajas":0.0,"CajasEquiv":0.16666666666666666},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS PUERTO MERCADO","Vendedor":"","Sabor":"Frutos cítricos","Venta":193.12,"Piezas":8.0,"Cajas":0.0,"CajasEquiv":0.3333333333333333},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS PUERTO MERCADO","Vendedor":"","Sabor":"Frutos verdes","Venta":72.42,"Piezas":3.0,"Cajas":0.0,"CajasEquiv":0.125},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS PUERTO MERCADO","Vendedor":"","Sabor":"Mango maracuyá","Venta":193.13,"Piezas":7.0,"Cajas":0.0,"CajasEquiv":0.2916666666666667},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS CENTRO PINOTEPA","Vendedor":"","Sabor":"Mora azul","Venta":246.51,"Piezas":11.0,"Cajas":0.0,"CajasEquiv":0.4583333333333333},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS CENTRO PINOTEPA","Vendedor":"","Sabor":"Frutos rojos","Venta":224.1,"Piezas":10.0,"Cajas":0.0,"CajasEquiv":0.4166666666666667},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS CENTRO PINOTEPA","Vendedor":"","Sabor":"Frutos cítricos","Venta":291.34,"Piezas":13.0,"Cajas":0.0,"CajasEquiv":0.5416666666666666},{"Supervisor":"Omar","Grupo":"CONVENIENCIA","Tienda":"VIGS CENTRO PINOTEPA","Vendedor":"","Sabor":"Mango maracuyá","Venta":155.16,"Piezas":6.0,"Cajas":0.0,"CajasEquiv":0.25},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS PUERTO ADOQUIN","Vendedor":"","Sabor":"Mora azul","Venta":72.42,"Piezas":3.0,"Cajas":0.0,"CajasEquiv":0.125},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS PUERTO ADOQUIN","Vendedor":"","Sabor":"Frutos rojos","Venta":96.56,"Piezas":4.0,"Cajas":0.0,"CajasEquiv":0.16666666666666666},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS PUERTO ADOQUIN","Vendedor":"","Sabor":"Frutos cítricos","Venta":120.7,"Piezas":5.0,"Cajas":0.0,"CajasEquiv":0.20833333333333334},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS PUERTO ADOQUIN","Vendedor":"","Sabor":"Frutos verdes","Venta":48.28,"Piezas":2.0,"Cajas":0.0,"CajasEquiv":0.08333333333333333},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS PUERTO ADOQUIN","Vendedor":"","Sabor":"Mango maracuyá","Venta":193.13,"Piezas":7.0,"Cajas":0.0,"CajasEquiv":0.2916666666666667},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS GRANJAS DEL PESCADOR","Vendedor":"","Sabor":"Mora azul","Venta":265.54,"Piezas":11.0,"Cajas":0.0,"CajasEquiv":0.4583333333333333},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS GRANJAS DEL PESCADOR","Vendedor":"","Sabor":"Frutos rojos","Venta":193.12,"Piezas":8.0,"Cajas":0.0,"CajasEquiv":0.3333333333333333},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS GRANJAS DEL PESCADOR","Vendedor":"","Sabor":"Frutos cítricos","Venta":193.12,"Piezas":8.0,"Cajas":0.0,"CajasEquiv":0.3333333333333333},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS GRANJAS DEL PESCADOR","Vendedor":"","Sabor":"Frutos verdes","Venta":144.84,"Piezas":6.0,"Cajas":0.0,"CajasEquiv":0.25},{"Supervisor":"Erick","Grupo":"CONVENIENCIA","Tienda":"VIGS GRANJAS DEL PESCADOR","Vendedor":"","Sabor":"Mango maracuyá","Venta":469.03,"Piezas":17.0,"Cajas":0.0,"CajasEquiv":0.7083333333333334},{"Supervisor":"Omar","Grupo":"MICRO","Tienda":"VIGS MOVIL 002","Vendedor":"","Sabor":"Mora azul","Venta":168.98,"Piezas":7.0,"Cajas":0.0,"CajasEquiv":0.2916666666666667},{"Supervisor":"Omar","Grupo":"MICRO","Tienda":"VIGS MOVIL 002","Vendedor":"","Sabor":"Mango maracuyá","Venta":55.18,"Piezas":2.0,"Cajas":0.0,"CajasEquiv":0.08333333333333333}];
+const routeFlavorRows = [{"Supervisor":"Clarissa","Grupo":"AGENTES","Tienda":"BODEGA LA GUADALUPANA","Vendedor":"VF02 - GREGORIO LIMONES HERNANDEZ","Sabor":"Mora azul","Venta":439.66,"Piezas":0.0,"Cajas":1.0,"CajasEquiv":1.0},{"Supervisor":"Clarissa","Grupo":"AGENTES","Tienda":"BODEGA LA GUADALUPANA","Vendedor":"VF02 - GREGORIO LIMONES HERNANDEZ","Sabor":"Frutos rojos","Venta":1293.11,"Piezas":0.0,"Cajas":3.0,"CajasEquiv":3.0},{"Supervisor":"Clarissa","Grupo":"AGENTES","Tienda":"BODEGA LA GUADALUPANA","Vendedor":"VF02 - GREGORIO LIMONES HERNANDEZ","Sabor":"Frutos cítricos","Venta":887.94,"Piezas":0.0,"Cajas":2.0,"CajasEquiv":2.0},{"Supervisor":"Clarissa","Grupo":"AGENTES","Tienda":"BODEGA LA GUADALUPANA","Vendedor":"VF02 - GREGORIO LIMONES HERNANDEZ","Sabor":"Mango maracuyá","Venta":544.81,"Piezas":0.0,"Cajas":5.0,"CajasEquiv":5.0},{"Supervisor":"Clarissa","Grupo":"AGENTES","Tienda":"BODEGA LA GUADALUPANA","Vendedor":"VF06 - WILLIAM BAUTISTA HERNANDEZ","Sabor":"Mora azul","Venta":448.28,"Piezas":0.0,"Cajas":1.0,"CajasEquiv":1.0},{"Supervisor":"Clarissa","Grupo":"AGENTES","Tienda":"BODEGA LA GUADALUPANA","Vendedor":"VF06 - WILLIAM BAUTISTA HERNANDEZ","Sabor":"Mango maracuyá","Venta":475.88,"Piezas":0.0,"Cajas":4.0,"CajasEquiv":4.0},{"Supervisor":"Clarissa","Grupo":"SURTETODO","Tienda":"BODEGA LA GUADALUPANA","Vendedor":"VF10 - SURTE TODO FORANEO","Sabor":"Mora azul","Venta":2068.96,"Piezas":0.0,"Cajas":5.0,"CajasEquiv":5.0},{"Supervisor":"Clarissa","Grupo":"SURTETODO","Tienda":"BODEGA LA GUADALUPANA","Vendedor":"VF10 - SURTE TODO FORANEO","Sabor":"Frutos rojos","Venta":1258.62,"Piezas":0.0,"Cajas":3.0,"CajasEquiv":3.0},{"Supervisor":"Clarissa","Grupo":"SURTETODO","Tienda":"BODEGA LA GUADALUPANA","Vendedor":"VF10 - SURTE TODO FORANEO","Sabor":"Frutos cítricos","Venta":2474.13,"Piezas":0.0,"Cajas":6.0,"CajasEquiv":6.0},{"Supervisor":"Clarissa","Grupo":"SURTETODO","Tienda":"BODEGA LA GUADALUPANA","Vendedor":"VF10 - SURTE TODO FORANEO","Sabor":"Mango maracuyá","Venta":413.8,"Piezas":0.0,"Cajas":4.0,"CajasEquiv":4.0},{"Supervisor":"Clarissa","Grupo":"SURTETODO","Tienda":"BODEGA LA GUADALUPANA","Vendedor":"VF13 - SURTE TODO FORANEO 2","Sabor":"Mango maracuyá","Venta":206.9,"Piezas":0.0,"Cajas":2.0,"CajasEquiv":2.0},{"Supervisor":"Alicia","Grupo":"CAJERO","Tienda":"DIVITSA I","Vendedor":"T01M5 - MARIBEL RAMIREZ SANCHEZ","Sabor":"Mora azul","Venta":445.69,"Piezas":0.0,"Cajas":1.0,"CajasEquiv":1.0},{"Supervisor":"Alicia","Grupo":"CAJERO","Tienda":"DIVITSA I","Vendedor":"T01M5 - MARIBEL RAMIREZ SANCHEZ","Sabor":"Frutos cítricos","Venta":445.69,"Piezas":0.0,"Cajas":1.0,"CajasEquiv":1.0},{"Supervisor":"Alicia","Grupo":"CAJERO","Tienda":"DIVITSA I","Vendedor":"T01M9 - MERCEDES CRUZ GALLEGOS","Sabor":"Mora azul","Venta":227.59,"Piezas":0.0,"Cajas":0.5,"CajasEquiv":0.5},{"Supervisor":"Alicia","Grupo":"CAJERO","Tienda":"DIVITSA I","Vendedor":"T01M9 - MERCEDES CRUZ GALLEGOS","Sabor":"Frutos cítricos","Venta":227.59,"Piezas":0.0,"Cajas":0.5,"CajasEquiv":0.5},{"Supervisor":"Alicia","Grupo":"TELEMARKETING","Tienda":"DIVITSA I","Vendedor":"VM07 - SURTE TODO LOCAL 2","Sabor":"Mora azul","Venta":227.59,"Piezas":0.0,"Cajas":0.5,"CajasEquiv":0.5},{"Supervisor":"Alicia","Grupo":"TELEMARKETING","Tienda":"DIVITSA I","Vendedor":"VM07 - SURTE TODO LOCAL 2","Sabor":"Frutos rojos","Venta":227.59,"Piezas":0.0,"Cajas":0.5,"CajasEquiv":0.5},{"Supervisor":"Alicia","Grupo":"CAJERO","Tienda":"DIVITSA II","Vendedor":"T08C8 - YUVIA ITZEL FRANCO AGUILAR","Sabor":"Mora azul","Venta":227.59,"Piezas":0.0,"Cajas":0.5,"CajasEquiv":0.5},{"Supervisor":"Alicia","Grupo":"CAJERO","Tienda":"DIVITSA IV","Vendedor":"T25C1 - ERIKA HERNANDEZ ALAVEZ","Sabor":"Mora azul","Venta":134.47,"Piezas":0.0,"Cajas":0.25,"CajasEquiv":0.25},{"Supervisor":"Alicia","Grupo":"CAJERO","Tienda":"DIVITSA IV","Vendedor":"T25C1 - ERIKA HERNANDEZ ALAVEZ","Sabor":"Frutos rojos","Venta":227.59,"Piezas":0.0,"Cajas":0.5,"CajasEquiv":0.5},{"Supervisor":"Alicia","Grupo":"CAJERO","Tienda":"DIVITSA IV","Vendedor":"T25C1 - ERIKA HERNANDEZ ALAVEZ","Sabor":"Frutos cítricos","Venta":227.59,"Piezas":0.0,"Cajas":2.0,"CajasEquiv":2.0},{"Supervisor":"Alicia","Grupo":"CAJERO","Tienda":"DIVITSA III","Vendedor":"T26C4 - JULIETA SANTIAGO DELGADO","Sabor":"Mora azul","Venta":445.69,"Piezas":0.0,"Cajas":1.0,"CajasEquiv":1.0},{"Supervisor":"Alicia","Grupo":"CAJERO","Tienda":"DIVITSA III","Vendedor":"T26C4 - JULIETA SANTIAGO DELGADO","Sabor":"Frutos cítricos","Venta":405.17,"Piezas":0.0,"Cajas":1.0,"CajasEquiv":1.0}];
+let activeMechanic = 'cab';
 const saboresData = [{"Sabor": "Mora azul", "VentaPiezas": 9691.53, "Piezas": 433.0, "VentaCajas": 4665.52, "Cajas": 10.75, "CajasEquivPiezas": 18.0416666667, "CajasEquivTotal": 28.7916666667, "VentaTotal": 14357.05}, {"Sabor": "Frutos cítricos", "VentaPiezas": 8527.94, "Piezas": 379.0, "VentaCajas": 4668.11, "Cajas": 12.5, "CajasEquivPiezas": 15.7916666667, "CajasEquivTotal": 28.2916666667, "VentaTotal": 13196.05}, {"Sabor": "Mango maracuyá", "VentaPiezas": 8271.48, "Piezas": 318.0, "VentaCajas": 1641.39, "Cajas": 15.0, "CajasEquivPiezas": 13.25, "CajasEquivTotal": 28.25, "VentaTotal": 9912.87}, {"Sabor": "Frutos rojos", "VentaPiezas": 10824.35, "Piezas": 488.0, "VentaCajas": 3006.91, "Cajas": 7.0, "CajasEquivPiezas": 20.3333333333, "CajasEquivTotal": 27.3333333333, "VentaTotal": 13831.26}, {"Sabor": "Frutos verdes", "VentaPiezas": 4591.13, "Piezas": 199.0, "VentaCajas": 0.0, "Cajas": 0.0, "CajasEquivPiezas": 8.2916666667, "CajasEquivTotal": 8.2916666667, "VentaTotal": 4591.13}];
 
 const money = n => new Intl.NumberFormat('es-MX', { style:'currency', currency:'MXN', maximumFractionDigits:0 }).format(n || 0);
@@ -310,6 +317,7 @@ const num = (n, d=0) => new Intl.NumberFormat('es-MX', { minimumFractionDigits:d
 const pct = n => new Intl.NumberFormat('es-MX', {style:'percent', maximumFractionDigits:1}).format(n || 0);
 
 function selectMechanic(type){
+  activeMechanic = type;
   const isCab = type === 'cab';
   document.getElementById('card-cab').classList.toggle('active', isCab);
   document.getElementById('card-rutas').classList.toggle('active', !isCab);
@@ -320,6 +328,7 @@ function selectMechanic(type){
     ? '34 tiendas · 27 liberan · 1,817 piezas · $1,708 cajeros'
     : '10 vendedores · 45.25 cajas · 0 cumplen · $0 pago';
   document.getElementById('activeTag').textContent = isCab ? 'Mecánica: CA&B' : 'Mecánica: Rutas / Mostradores';
+  renderSabores();
   document.getElementById('detalle').scrollIntoView({behavior:'smooth', block:'start'});
 }
 
@@ -359,6 +368,9 @@ function renderCab(){
   document.getElementById('cabTableSummary').textContent=`${sup==='all'?'Todos los supervisores':sup} · ${tiendas} tiendas · ${num(piezas,0)} piezas · ${money(pago)} pago cajeros`;
   barChart('barPiezas',data,'Tienda','Piezas','',10,x=>num(x,0)); renderPiezasTable(); renderAssumption();
   document.getElementById('footerClose').innerHTML=`<strong>Cierre:</strong> pago total <span class="money">${money(totals.pago_total)}</span>: <span class="money">${money(totals.pago_cajeros)}</span> cajeros CA&B + <span class="money">$1,500</span> bolsa supervisor bajo criterio <strong>${allocationLabel()}</strong>. Rutas / Mostradores: <span class="money">$0</span>.`;
+  if(activeMechanic==='cab'){
+    renderSabores();
+  }
 }
 
 function renderPiezasTable(){
@@ -367,27 +379,170 @@ function renderPiezasTable(){
   document.getElementById('tablaPiezas').innerHTML=data.map(d=>`<tr><td><strong>${d.Supervisor}</strong></td><td>${d.GrupoTienda}</td><td><strong>${d.Tienda}</strong></td><td class="num">${money2(d.Venta)}</td><td class="num">${num(d.Piezas,0)}</td><td class="num">${num(d.CajasEquiv,2)}</td><td>${d.LiberaCajero?'<span class="pill ok">Libera pago</span>':'<span class="pill no">No libera</span>'}</td><td class="num money">${money(d.PagoCajero)}</td></tr>`).join('');
 }
 
-function currentRouteData(){const s=document.getElementById('routeSupervisorFilter').value,g=document.getElementById('routeGroupFilter').value;return cajasData.filter(d=>(s==='all'||d.Supervisor===s)&&(g==='all'||d.Grupo===g))}
+function syncRouteSellerFilter(reset=false){
+  const supervisor=document.getElementById('routeSupervisorFilter').value;
+  const group=document.getElementById('routeGroupFilter').value;
+  const sellerSelect=document.getElementById('routeSellerFilter');
+  const previous=sellerSelect.value;
+  const sellers=[...new Set(
+    cajasData
+      .filter(d=>(supervisor==='all'||d.Supervisor===supervisor)&&(group==='all'||d.Grupo===group))
+      .map(d=>d.Vendedor)
+  )].sort();
+
+  sellerSelect.innerHTML='<option value="all">Todos los vendedores</option>'+
+    sellers.map(v=>`<option value="${v}">${v}</option>`).join('');
+
+  if(!reset && previous!=='all' && sellers.includes(previous)){
+    sellerSelect.value=previous;
+  }else{
+    sellerSelect.value='all';
+  }
+}
+
+function currentRouteData(){
+  const s=document.getElementById('routeSupervisorFilter').value;
+  const g=document.getElementById('routeGroupFilter').value;
+  const v=document.getElementById('routeSellerFilter').value;
+  return cajasData.filter(d=>
+    (s==='all'||d.Supervisor===s)&&
+    (g==='all'||d.Grupo===g)&&
+    (v==='all'||d.Vendedor===v)
+  );
+}
 function renderRouteSupervisor(){
   const selected=document.getElementById('routeSupervisorFilter').value; let data=routeSupervisorData; if(selected!=='all')data=data.filter(d=>d.Supervisor===selected);
   document.getElementById('routeSupervisorResult').innerHTML=`<div class="metric-stack">${data.map(d=>`<div class="allocation-row"><div><strong style="text-align:left;color:#fff">${d.Supervisor}</strong><br><span>${d.Cumplen} de ${d.Equipo} vendedores</span></div><span>${pct(d.CoberturaPct)}</span><strong>${money(d.PagoSupervisor)}</strong></div>`).join('')}</div><div class="small-note">Base: 40% del equipo con mínimo 30 cajas. Ningún supervisor libera pago.</div>`;
 }
-function renderRoutes(){
-  const data=currentRouteData(), sellers=data.length, cajas=data.reduce((a,d)=>a+d.Cajas,0), cumplen=data.filter(d=>d.CumpleVendedor).length, pago=data.reduce((a,d)=>a+d.PagoVendedor,0);
-  document.getElementById('rutMostradores').textContent=num(sellers,0);document.getElementById('rutCajas').textContent=num(cajas,2);document.getElementById('rutLib').textContent=`${cumplen}/${sellers}`;document.getElementById('rutPago').textContent=money(pago);
-  const s=document.getElementById('routeSupervisorFilter').value,g=document.getElementById('routeGroupFilter').value;
-  document.getElementById('routeTableSummary').textContent=`${s==='all'?'Todos los supervisores':s} · ${g==='all'?'Todos los grupos':g} · ${sellers} vendedores · ${num(cajas,2)} cajas`;
+function renderRoutes(resetSeller=false){
+  syncRouteSellerFilter(resetSeller);
+  const data=currentRouteData();
+  const sellers=data.length;
+  const cajas=data.reduce((a,d)=>a+d.Cajas,0);
+  const cumplen=data.filter(d=>d.CumpleVendedor).length;
+  const pago=data.reduce((a,d)=>a+d.PagoVendedor,0);
+
+  document.getElementById('rutMostradores').textContent=num(sellers,0);
+  document.getElementById('rutCajas').textContent=num(cajas,2);
+  document.getElementById('rutLib').textContent=`${cumplen}/${sellers}`;
+  document.getElementById('rutPago').textContent=money(pago);
+
+  const s=document.getElementById('routeSupervisorFilter').value;
+  const g=document.getElementById('routeGroupFilter').value;
+  const v=document.getElementById('routeSellerFilter').value;
+
+  document.getElementById('routeTableSummary').textContent=
+    `${s==='all'?'Todos los supervisores':s} · `+
+    `${g==='all'?'Todos los grupos':g} · `+
+    `${v==='all'?'Todos los vendedores':v} · `+
+    `${sellers} vendedores · ${num(cajas,2)} cajas`;
+
   document.getElementById('routeTag').textContent=`${cumplen} cumplen · ${sellers-cumplen} no cumplen`;
-  barChart('barCajas',data,'Vendedor','Cajas','blue',10,x=>num(x,2)); renderCajasTable(); renderRouteSupervisor();
+  barChart('barCajas',data,'Vendedor','Cajas','blue',10,x=>num(x,2));
+  renderCajasTable();
+  renderRouteSupervisor();
+
+  if(activeMechanic==='rutas'){
+    renderSabores();
+  }
 }
 function renderCajasTable(){const data=[...currentRouteData()].sort((a,b)=>b.Cajas-a.Cajas);document.getElementById('tablaCajas').innerHTML=data.map(d=>`<tr><td><strong>${d.Supervisor}</strong></td><td>${d.Grupo}</td><td><strong>${d.Vendedor}</strong></td><td>${d.Tienda}</td><td class="num">${money2(d.Venta)}</td><td class="num">${num(d.Cajas,2)}</td><td>${d.CumpleVendedor?'<span class="pill ok">Cumple</span>':'<span class="pill no">No cumple</span>'}</td><td class="num money">${money(d.PagoVendedor)}</td></tr>`).join('')}
 
-function renderSabores(){const sorted=[...saboresData].sort((a,b)=>b.CajasEquivTotal-a.CajasEquivTotal);document.getElementById('tablaSabores').innerHTML=sorted.map(d=>`<tr><td><strong>${d.Sabor}</strong></td><td class="num">${money2(d.VentaTotal)}</td><td class="num">${num(d.Piezas,0)}</td><td class="num">${num(d.Cajas,2)}</td><td class="num">${num(d.CajasEquivTotal,2)}</td></tr>`).join('')}
+function currentFlavorRows(){
+  if(activeMechanic==='cab'){
+    const supervisor=document.getElementById('cabSupervisorFilter').value;
+    return cabFlavorRows.filter(d=>supervisor==='all'||d.Supervisor===supervisor);
+  }
+
+  const supervisor=document.getElementById('routeSupervisorFilter').value;
+  const group=document.getElementById('routeGroupFilter').value;
+  const seller=document.getElementById('routeSellerFilter').value;
+
+  return routeFlavorRows.filter(d=>
+    (supervisor==='all'||d.Supervisor===supervisor)&&
+    (group==='all'||d.Grupo===group)&&
+    (seller==='all'||d.Vendedor===seller)
+  );
+}
+
+function aggregateFlavors(rows){
+  const map=new Map();
+
+  rows.forEach(row=>{
+    if(!map.has(row.Sabor)){
+      map.set(row.Sabor,{
+        Sabor:row.Sabor,
+        VentaTotal:0,
+        Piezas:0,
+        Cajas:0,
+        CajasEquivTotal:0
+      });
+    }
+
+    const item=map.get(row.Sabor);
+    item.VentaTotal+=row.Venta||0;
+    item.Piezas+=row.Piezas||0;
+    item.Cajas+=row.Cajas||0;
+    item.CajasEquivTotal+=row.CajasEquiv||0;
+  });
+
+  return [...map.values()].sort((a,b)=>b.CajasEquivTotal-a.CajasEquivTotal);
+}
+
+function renderSabores(){
+  const rows=currentFlavorRows();
+  const data=aggregateFlavors(rows);
+
+  const totalVenta=data.reduce((a,d)=>a+d.VentaTotal,0);
+  const totalPiezas=data.reduce((a,d)=>a+d.Piezas,0);
+  const totalCajas=data.reduce((a,d)=>a+d.Cajas,0);
+  const totalEquiv=data.reduce((a,d)=>a+d.CajasEquivTotal,0);
+
+  if(activeMechanic==='cab'){
+    const supervisor=document.getElementById('cabSupervisorFilter').value;
+    document.getElementById('mixTitle').textContent='Mix de sabores · CA&B';
+    document.getElementById('mixSubtitle').textContent=
+      `${supervisor==='all'?'Todos los supervisores':supervisor} · `+
+      `${num(totalPiezas,0)} piezas · ${num(totalEquiv,2)} cajas equivalentes · ${money2(totalVenta)} venta.`;
+    document.getElementById('mixTag').textContent=
+      supervisor==='all'?'Vista general CA&B':`Supervisor: ${supervisor}`;
+  }else{
+    const supervisor=document.getElementById('routeSupervisorFilter').value;
+    const group=document.getElementById('routeGroupFilter').value;
+    const seller=document.getElementById('routeSellerFilter').value;
+
+    document.getElementById('mixTitle').textContent='Mix de sabores · Rutas / Mostradores';
+    document.getElementById('mixSubtitle').textContent=
+      `${supervisor==='all'?'Todos los supervisores':supervisor} · `+
+      `${group==='all'?'Todos los grupos':group} · `+
+      `${seller==='all'?'Todos los vendedores':seller} · `+
+      `${num(totalCajas,2)} cajas · ${money2(totalVenta)} venta.`;
+    document.getElementById('mixTag').textContent=
+      seller!=='all'?`Vendedor filtrado`:
+      group!=='all'?`Grupo: ${group}`:
+      supervisor!=='all'?`Supervisor: ${supervisor}`:
+      'Vista general Rutas';
+  }
+
+  barChart('barSabores',data,'Sabor','CajasEquivTotal','purple',8,x=>num(x,2));
+
+  document.getElementById('tablaSabores').innerHTML=data.length
+    ? data.map(d=>`<tr>
+        <td><strong>${d.Sabor}</strong></td>
+        <td class="num">${money2(d.VentaTotal)}</td>
+        <td class="num">${num(d.Piezas,0)}</td>
+        <td class="num">${num(d.Cajas,2)}</td>
+        <td class="num">${num(d.CajasEquivTotal,2)}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="5"><div class="empty-state">Sin registros para los filtros seleccionados.</div></td></tr>';
+}
 
 function init(){
   fillFilters();
   document.getElementById('kpiVentaTotal').textContent=money(totals.venta_total);document.getElementById('kpiVolumen').textContent=num(totals.cajas_equiv_total,2);document.getElementById('kpiPagoBase').textContent=money(totals.pago_base);document.getElementById('kpiPagoPotencial').textContent=money(totals.pago_total);
-  barChart('barSabores',saboresData,'Sabor','CajasEquivTotal','purple',8,x=>num(x,2));renderSabores();renderCab();renderRoutes();
+  renderCab();
+  renderRoutes(true);
+  renderSabores();
 }
 init();
 </script>
