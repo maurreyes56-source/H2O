@@ -133,6 +133,14 @@
   .ghost-btn:hover{background:rgba(255,230,0,.14); border-color:rgba(255,230,0,.40)}
   @media(max-width:1050px){.hero-grid,.detail-grid,.detail-grid.three,.two-col{grid-template-columns:1fr}.poster-card{min-height:240px}.kpi-strip,.mini-kpis{grid-template-columns:repeat(2,1fr)}}
   @media(max-width:640px){.wrap{padding:14px 10px 36px}.hero{padding:16px; border-radius:24px}.poster-grid,.kpi-strip,.mini-kpis{grid-template-columns:1fr}.poster-card{min-height:230px}h1{font-size:40px}.section-head{display:block}.bar-item{grid-template-columns:1fr; gap:5px}.bar-val{text-align:left}.controls input,.controls select{width:100%}table{min-width:680px}}
+
+  .filter-band{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px;padding:14px 16px}
+  .filter-band .filter-copy{display:grid;gap:3px}.filter-band .filter-copy strong{text-transform:uppercase;letter-spacing:.05em;font-size:12px}.filter-band .filter-copy span{font-size:13px;color:var(--muted)}
+  .filter-band select{min-width:220px}
+  .allocation-list{display:grid;gap:8px;margin-top:10px}.allocation-row{display:grid;grid-template-columns:1fr 78px 88px;gap:8px;align-items:center;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10)}
+  .allocation-row.active{border-color:rgba(255,230,0,.65);background:rgba(255,230,0,.12)}.allocation-row span{font-size:12px;color:var(--muted)}.allocation-row strong{text-align:right;color:var(--yellow)}
+  .small-note{font-size:11px;color:rgba(255,255,255,.58);line-height:1.35;margin-top:9px}.metric-stack{display:grid;gap:8px;margin-top:10px}.metric-line{display:flex;justify-content:space-between;gap:12px;font-size:13px}.metric-line span{color:var(--muted)}.metric-line strong{font-variant-numeric:tabular-nums}
+  @media(max-width:700px){.filter-band{align-items:stretch;flex-direction:column}.filter-band select{width:100%;min-width:0}.allocation-row{grid-template-columns:1fr 68px 78px}}
 </style>
 </head>
 <body>
@@ -169,121 +177,101 @@
     <div class="kpi-strip">
       <div class="card kpi"><div class="label">Venta total concurso</div><div class="value yellow" id="kpiVentaTotal"></div><div class="foot">CA&B + Rutas / Mostradores</div></div>
       <div class="card kpi"><div class="label">Volumen equivalente</div><div class="value blue"><span id="kpiVolumen"></span></div><div class="foot">Caja equivalente = 24 piezas</div></div>
-      <div class="card kpi"><div class="label">Pago base liberado</div><div class="value green" id="kpiPagoBase"></div><div class="foot">Cajeros + vendedores</div></div>
-      <div class="card kpi"><div class="label">Pago con supuesto supervisor</div><div class="value pink" id="kpiPagoPotencial"></div><div class="foot">Escenario con supervisor CA&B</div></div>
+      <div class="card kpi"><div class="label">Pago operativo liberado</div><div class="value green" id="kpiPagoBase"></div><div class="foot">Cajeros CA&B + Rutas / Mostradores</div></div>
+      <div class="card kpi"><div class="label">Pago total concurso</div><div class="value pink" id="kpiPagoPotencial"></div><div class="foot">Incluye bolsa supervisor CA&B de $1,500</div></div>
     </div>
   </header>
 
   <section class="section-head" id="detalle">
     <div>
-      <h2 id="activeTitle">Detalle CA&B</h2>
-      <p id="activeCopy">34 tiendas · 27 liberan · $1,708 pago cajeros</p>
+      <h2 id="activeTitle">Resultado CA&B</h2>
+      <p id="activeCopy">34 tiendas · 27 liberan · 1,817 piezas · $1,708 cajeros</p>
     </div>
     <span class="tag warn" id="activeTag">Mecánica: CA&B</span>
   </section>
 
   <section id="panel-cab" class="mechanic-panel active">
+    <div class="card filter-band">
+      <div class="filter-copy"><strong>Filtro de supervisor</strong><span>Actualiza indicadores, ranking y detalle de tiendas.</span></div>
+      <select id="cabSupervisorFilter" onchange="renderCab()"><option value="all">Todos los supervisores</option></select>
+    </div>
     <div class="mini-kpis">
       <div class="mini"><span>Tiendas que liberan</span><strong class="green" id="cabTiendas"></strong></div>
       <div class="mini"><span>Piezas vendidas</span><strong class="yellow" id="cabPiezas"></strong></div>
       <div class="mini"><span>Pago cajeros</span><strong class="green" id="cabPago"></strong></div>
-      <div class="mini"><span>No liberan</span><strong class="pink" id="cabNoLib"></strong></div>
+      <div class="mini"><span>Bolsa supervisor</span><strong class="pink" id="cabBolsa"></strong></div>
     </div>
 
     <div class="detail-grid three">
       <div class="card rule-card">
-        <div class="rule-title">Cierre de mecánica</div>
+        <div class="rule-title">Resultado CA&B</div>
         <div class="rule-big yellow">$1 por lata</div>
         <p class="rule-copy"><strong>Base:</strong> 1 caja por tienda.</p>
         <p class="rule-copy"><strong id="cabPaidPieces"></strong> piezas pagables · <strong id="cabNoPaidPieces"></strong> piezas sin pago.</p>
       </div>
       <div class="card">
-        <div class="rule-title">Top 10 tiendas por piezas</div>
+        <div class="rule-title">Ranking de tiendas</div>
         <div class="bars" id="barPiezas"></div>
       </div>
       <div class="card assumption-box">
-        <div class="rule-title">Supervisor CA&B</div>
-        <select id="assumptionSelect" onchange="renderAssumption()">
-          <option value="A">Supuesto A · Participación</option>
-          <option value="B">Supuesto B · Volumen</option>
-          <option value="C">Supuesto C · 50/50</option>
+        <div class="rule-title">Distribución bolsa supervisores · $1,500</div>
+        <select id="assumptionSelect" onchange="renderCab()">
+          <option value="A">Participación · tiendas que liberan</option>
+          <option value="B">Volumen · piezas vendidas</option>
+          <option value="C" selected>Mixto · 50% participación / 50% volumen</option>
         </select>
         <div class="assumption-result" id="assumptionResult"></div>
       </div>
     </div>
 
     <div class="section-head">
-      <div>
-        <h2>CA&B por tienda</h2>
-        <p>27 liberan · 7 no liberan · pago cajeros $1,708</p>
-      </div>
+      <div><h2>CA&B por tienda</h2><p id="cabTableSummary"></p></div>
       <span class="tag ok" id="tagLib"></span>
     </div>
     <div class="card">
       <div class="controls">
         <input id="searchPiezas" placeholder="Buscar tienda..." oninput="renderPiezasTable()" />
-        <select id="filterPiezas" onchange="renderPiezasTable()">
-          <option value="all">Todas</option>
-          <option value="ok">Solo liberan</option>
-          <option value="no">Solo no liberan</option>
-        </select>
-        <select id="sortPiezas" onchange="renderPiezasTable()">
-          <option value="Piezas">Ordenar por piezas</option>
-          <option value="Venta">Ordenar por venta</option>
-          <option value="PagoCajero">Ordenar por pago</option>
-          <option value="CajasEquiv">Ordenar por cajas equiv.</option>
-        </select>
+        <select id="filterPiezas" onchange="renderPiezasTable()"><option value="all">Todas</option><option value="ok">Solo liberan</option><option value="no">Solo no liberan</option></select>
+        <select id="sortPiezas" onchange="renderPiezasTable()"><option value="Piezas">Ordenar por piezas</option><option value="Venta">Ordenar por venta</option><option value="PagoCajero">Ordenar por pago</option><option value="CajasEquiv">Ordenar por cajas equiv.</option></select>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Tienda</th><th class="num">Venta</th><th class="num">Piezas</th><th class="num">Cajas equiv.</th><th>Estatus</th><th class="num">Pago</th></tr></thead>
-          <tbody id="tablaPiezas"></tbody>
-        </table>
-      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Supervisor</th><th>División</th><th>Tienda</th><th class="num">Venta</th><th class="num">Piezas</th><th class="num">Cajas equiv.</th><th>Estatus</th><th class="num">Pago</th></tr></thead>
+        <tbody id="tablaPiezas"></tbody>
+      </table></div>
     </div>
   </section>
 
   <section id="panel-rutas" class="mechanic-panel">
+    <div class="card filter-band">
+      <div class="filter-copy"><strong>Filtros Rutas / Mostradores</strong><span>Supervisor y grupo comercial.</span></div>
+      <div class="controls" style="margin:0"><select id="routeSupervisorFilter" onchange="renderRoutes()"><option value="all">Todos los supervisores</option></select><select id="routeGroupFilter" onchange="renderRoutes()"><option value="all">Todos los grupos</option></select></div>
+    </div>
     <div class="mini-kpis">
-      <div class="mini"><span>Mostradores</span><strong class="blue" id="rutMostradores"></strong></div>
+      <div class="mini"><span>Vendedores</span><strong class="blue" id="rutMostradores"></strong></div>
       <div class="mini"><span>Cajas vendidas</span><strong class="yellow" id="rutCajas"></strong></div>
-      <div class="mini"><span>Vendedores que liberan</span><strong class="green" id="rutLib"></strong></div>
-      <div class="mini"><span>Pago vendedor</span><strong class="green" id="rutPago"></strong></div>
+      <div class="mini"><span>Vendedores que cumplen</span><strong class="green" id="rutLib"></strong></div>
+      <div class="mini"><span>Pago liberado</span><strong class="pink" id="rutPago"></strong></div>
     </div>
 
     <div class="detail-grid three">
       <div class="card rule-card">
-        <div class="rule-title">Cierre de mecánica</div>
+        <div class="rule-title">Resultado vendedor</div>
         <div class="rule-big yellow">$17 por caja</div>
         <p class="rule-copy"><strong>Base:</strong> 30 cajas por vendedor.</p>
-        <p class="rule-copy"><strong>Bodega La Guadalupana</strong> libera pago: 36 cajas · $612.</p>
+        <p class="rule-copy"><strong>0 vendedores</strong> cumplen · pago <strong>$0</strong>.</p>
       </div>
-      <div class="card">
-        <div class="rule-title">Ranking por cajas</div>
-        <div class="bars" id="barCajas"></div>
-      </div>
-      <div class="card">
-        <div class="rule-title">Supervisor Rutas / Mostradores</div>
-        <div class="rule-big pink">$0</div>
-        <div class="empty-state"><strong>Supervisor: $0.</strong><br>Base 40% equipo no alcanzada.</div>
-      </div>
+      <div class="card"><div class="rule-title">Ranking por vendedor</div><div class="bars" id="barCajas"></div></div>
+      <div class="card"><div class="rule-title">Supervisor · $3 por caja</div><div id="routeSupervisorResult"></div></div>
     </div>
 
     <div class="section-head">
-      <div>
-        <h2>Rutas / Mostradores</h2>
-        <p>1 libera · 4 no liberan · pago vendedor $612</p>
-      </div>
-      <span class="tag ok">1 libera · 4 no liberan</span>
+      <div><h2>Rutas / Mostradores por vendedor</h2><p id="routeTableSummary"></p></div>
+      <span class="tag no" id="routeTag">0 cumplen</span>
     </div>
-    <div class="card">
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Mostrador / Ruta</th><th class="num">Venta</th><th class="num">Cajas</th><th>Estatus</th><th class="num">Pago vendedor</th></tr></thead>
-          <tbody id="tablaCajas"></tbody>
-        </table>
-      </div>
-    </div>
+    <div class="card"><div class="table-wrap"><table>
+      <thead><tr><th>Supervisor</th><th>Grupo</th><th>Vendedor</th><th>Tienda</th><th class="num">Venta</th><th class="num">Cajas</th><th>Estatus</th><th class="num">Pago</th></tr></thead>
+      <tbody id="tablaCajas"></tbody>
+    </table></div></div>
   </section>
 
   <section class="section-head">
@@ -305,20 +293,21 @@
     </div>
   </div>
 
-  <div class="footer-note">
-    <strong>Cierre:</strong> pago base liberado <span class="money" id="footPago"></span>. Pendiente: supervisor CA&B por <span class="money">$1,500</span>, sujeto a criterio oficial y mapeo supervisor-tienda.
-  </div>
+  <div class="footer-note" id="footerClose"></div>
 </div>
 
 <script>
-const totals = {"venta_piezas": 41906.42999999999, "piezas": 1817.0, "tiendas_piezas": 34, "tiendas_piezas_liberadas": 27, "tiendas_piezas_no_liberadas": 7, "pago_cajeros": 1708.0, "venta_cajas": 13981.93, "cajas": 45.25, "mostradores": 5, "mostradores_liberados": 1, "pago_vendedor": 612.0, "venta_total": 55888.35999999999, "cajas_equiv_total": 120.95833333333333, "pago_base": 2320.0, "pago_potencial_sup": 3820.0, "piezas_no_liberadas": 109.0, "venta_no_liberada": 2672.5299999999997};
-const piezasData = [{"Tienda": "VIGS JAMILTEPEC", "Venta": 3186.49, "Piezas": 130.0, "CajasEquiv": 5.416666666666667, "LiberaCajero": true, "PagoCajero": 130.0}, {"Tienda": "VIGS SAN ANTONIO", "Venta": 2991.02, "Piezas": 129.0, "CajasEquiv": 5.375, "LiberaCajero": true, "PagoCajero": 129.0}, {"Tienda": "VIGS BASICO OMETEPEC", "Venta": 2224.09, "Piezas": 114.0, "CajasEquiv": 4.75, "LiberaCajero": true, "PagoCajero": 114.0}, {"Tienda": "VIGS MENUDEO", "Venta": 2506.66, "Piezas": 110.0, "CajasEquiv": 4.583333333333333, "LiberaCajero": true, "PagoCajero": 110.0}, {"Tienda": "VIGS BASICO CUAJI", "Venta": 2144.74, "Piezas": 106.0, "CajasEquiv": 4.416666666666667, "LiberaCajero": true, "PagoCajero": 106.0}, {"Tienda": "VIGS LIBRAMIENTO", "Venta": 2378.9900000000002, "Piezas": 102.0, "CajasEquiv": 4.25, "LiberaCajero": true, "PagoCajero": 102.0}, {"Tienda": "VIGS BASICO JAMILTEPEC", "Venta": 1885.98, "Piezas": 84.0, "CajasEquiv": 3.5, "LiberaCajero": true, "PagoCajero": 84.0}, {"Tienda": "VIGS GAVIOTAS", "Venta": 1858.3700000000001, "Piezas": 82.0, "CajasEquiv": 3.4166666666666665, "LiberaCajero": true, "PagoCajero": 82.0}, {"Tienda": "VIGS CBTA", "Venta": 1822.1599999999999, "Piezas": 79.0, "CajasEquiv": 3.2916666666666665, "LiberaCajero": true, "PagoCajero": 79.0}, {"Tienda": "VIGS HACIENDA", "Venta": 1511.8899999999999, "Piezas": 65.0, "CajasEquiv": 2.7083333333333335, "LiberaCajero": true, "PagoCajero": 65.0}, {"Tienda": "VIGS PLAZA MERCADO", "Venta": 1463.58, "Piezas": 63.0, "CajasEquiv": 2.625, "LiberaCajero": true, "PagoCajero": 63.0}, {"Tienda": "VIGS BOULEVARD", "Venta": 1493.24, "Piezas": 60.0, "CajasEquiv": 2.5, "LiberaCajero": true, "PagoCajero": 60.0}, {"Tienda": "VIGS 5 DE MAYO", "Venta": 1194.69, "Piezas": 51.0, "CajasEquiv": 2.125, "LiberaCajero": true, "PagoCajero": 51.0}, {"Tienda": "VIGS GRANJAS DEL PESCADOR", "Venta": 1265.65, "Piezas": 50.0, "CajasEquiv": 2.0833333333333335, "LiberaCajero": true, "PagoCajero": 50.0}, {"Tienda": "VIGS RIO GRANDE", "Venta": 1213.82, "Piezas": 50.0, "CajasEquiv": 2.0833333333333335, "LiberaCajero": true, "PagoCajero": 50.0}, {"Tienda": "VIGS CUAJI", "Venta": 1120.6299999999999, "Piezas": 48.0, "CajasEquiv": 2.0, "LiberaCajero": true, "PagoCajero": 48.0}, {"Tienda": "COMERCIAL MENUDEO", "Venta": 1044.67, "Piezas": 46.0, "CajasEquiv": 1.9166666666666667, "LiberaCajero": true, "PagoCajero": 46.0}, {"Tienda": "VIGS PUERTO I", "Venta": 1013.89, "Piezas": 41.0, "CajasEquiv": 1.7083333333333333, "LiberaCajero": true, "PagoCajero": 41.0}, {"Tienda": "VIGS ZICATELA", "Venta": 1010.45, "Piezas": 40.0, "CajasEquiv": 1.6666666666666667, "LiberaCajero": true, "PagoCajero": 40.0}, {"Tienda": "VIGS CENTRO PINOTEPA", "Venta": 917.1099999999999, "Piezas": 40.0, "CajasEquiv": 1.6666666666666667, "LiberaCajero": true, "PagoCajero": 40.0}, {"Tienda": "VIGS AVENIDA JUAREZ", "Venta": 879.19, "Piezas": 38.0, "CajasEquiv": 1.5833333333333333, "LiberaCajero": true, "PagoCajero": 38.0}, {"Tienda": "VIGS CENTRAL", "Venta": 839.53, "Piezas": 37.0, "CajasEquiv": 1.5416666666666667, "LiberaCajero": true, "PagoCajero": 37.0}, {"Tienda": "VIGS PUERTO II", "Venta": 886.29, "Piezas": 36.0, "CajasEquiv": 1.5, "LiberaCajero": true, "PagoCajero": 36.0}, {"Tienda": "VIGS BASICO PUERTO ESCONDIDO", "Venta": 596.54, "Piezas": 30.0, "CajasEquiv": 1.25, "LiberaCajero": true, "PagoCajero": 30.0}, {"Tienda": "VIGS ALBOMONCI", "Venta": 615.42, "Piezas": 27.0, "CajasEquiv": 1.125, "LiberaCajero": true, "PagoCajero": 27.0}, {"Tienda": "VIGS ALVARO CARRILLO", "Venta": 591.31, "Piezas": 25.0, "CajasEquiv": 1.0416666666666667, "LiberaCajero": true, "PagoCajero": 25.0}, {"Tienda": "VIGS MARQUELIA", "Venta": 577.5, "Piezas": 25.0, "CajasEquiv": 1.0416666666666667, "LiberaCajero": true, "PagoCajero": 25.0}, {"Tienda": "VIGS PUERTO MERCADO", "Venta": 579.37, "Piezas": 23.0, "CajasEquiv": 0.9583333333333334, "LiberaCajero": false, "PagoCajero": 0.0}, {"Tienda": "VIGS PUERTO ADOQUIN", "Venta": 531.09, "Piezas": 21.0, "CajasEquiv": 0.875, "LiberaCajero": false, "PagoCajero": 0.0}, {"Tienda": "VIGS PUERTO CENTRAL", "Venta": 432.77, "Piezas": 18.0, "CajasEquiv": 0.75, "LiberaCajero": false, "PagoCajero": 0.0}, {"Tienda": "VIGS TONAMECA", "Venta": 417.28, "Piezas": 17.0, "CajasEquiv": 0.7083333333333334, "LiberaCajero": false, "PagoCajero": 0.0}, {"Tienda": "VIGS SAN JOSE DEL PROGRESO", "Venta": 256.86, "Piezas": 11.0, "CajasEquiv": 0.4583333333333333, "LiberaCajero": false, "PagoCajero": 0.0}, {"Tienda": "VIGS CACAHUATEPEC", "Venta": 231.0, "Piezas": 10.0, "CajasEquiv": 0.4166666666666667, "LiberaCajero": false, "PagoCajero": 0.0}, {"Tienda": "VIGS MOVIL 002", "Venta": 224.16, "Piezas": 9.0, "CajasEquiv": 0.375, "LiberaCajero": false, "PagoCajero": 0.0}];
-const cajasData = [{"Tienda": "BODEGA LA GUADALUPANA", "Venta": 10512.09, "Cajas": 36.0, "CumpleVendedor": true, "PagoVendedor": 612.0}, {"Tienda": "DIVITSA I", "Venta": 1801.74, "Cajas": 4.0, "CumpleVendedor": false, "PagoVendedor": 0.0}, {"Tienda": "DIVITSA IV", "Venta": 589.65, "Cajas": 2.75, "CumpleVendedor": false, "PagoVendedor": 0.0}, {"Tienda": "DIVITSA III", "Venta": 850.86, "Cajas": 2.0, "CumpleVendedor": false, "PagoVendedor": 0.0}, {"Tienda": "DIVITSA II", "Venta": 227.59, "Cajas": 0.5, "CumpleVendedor": false, "PagoVendedor": 0.0}];
-const saboresData = [{"Sabor": "Mora azul", "VentaPiezas": 9691.53, "Piezas": 433.0, "VentaCajas": 4665.52, "Cajas": 10.75, "CajasEquivPiezas": 18.041666666666668, "CajasEquivTotal": 28.791666666666668, "VentaTotal": 14357.050000000001}, {"Sabor": "Frutos cítricos", "VentaPiezas": 8527.94, "Piezas": 379.0, "VentaCajas": 4668.110000000001, "Cajas": 12.5, "CajasEquivPiezas": 15.791666666666666, "CajasEquivTotal": 28.291666666666664, "VentaTotal": 13196.050000000001}, {"Sabor": "Mango maracuyá", "VentaPiezas": 8271.48, "Piezas": 318.0, "VentaCajas": 1641.39, "Cajas": 15.0, "CajasEquivPiezas": 13.25, "CajasEquivTotal": 28.25, "VentaTotal": 9912.869999999999}, {"Sabor": "Frutos rojos", "VentaPiezas": 10824.35, "Piezas": 488.0, "VentaCajas": 3006.91, "Cajas": 7.0, "CajasEquivPiezas": 20.333333333333332, "CajasEquivTotal": 27.333333333333332, "VentaTotal": 13831.26}, {"Sabor": "Frutos verdes", "VentaPiezas": 4591.13, "Piezas": 199.0, "VentaCajas": 0.0, "Cajas": 0.0, "CajasEquivPiezas": 8.291666666666666, "CajasEquivTotal": 8.291666666666666, "VentaTotal": 4591.13}];
+const totals = {"venta_piezas": 41906.42999999999, "piezas": 1817.0, "tiendas_piezas": 34, "tiendas_piezas_liberadas": 27, "tiendas_piezas_no_liberadas": 7, "pago_cajeros": 1708.0, "venta_cajas": 13981.930000000002, "cajas": 45.25, "vendedores": 10, "vendedores_liberados": 0, "pago_vendedor": 0.0, "pago_supervisor_rutas": 0.0, "venta_total": 55888.35999999999, "cajas_equiv_total": 120.95833333333333, "pago_base": 1708.0, "bolsa_supervisor_cab": 1500, "pago_total": 3208.0, "piezas_no_liberadas": 109.0};
+const piezasData = [{"Supervisor": "Omar", "GrupoTienda": "CONVENIENCIA", "Tienda": "VIGS JAMILTEPEC", "Venta": 3186.49, "Piezas": 130.0, "CajasEquiv": 5.4166666667, "LiberaCajero": true, "PagoCajero": 130.0}, {"Supervisor": "Omar", "GrupoTienda": "CONVENIENCIA", "Tienda": "VIGS SAN ANTONIO", "Venta": 2991.02, "Piezas": 129.0, "CajasEquiv": 5.375, "LiberaCajero": true, "PagoCajero": 129.0}, {"Supervisor": "Alicia", "GrupoTienda": "AUTOSERVICIO BASICO", "Tienda": "VIGS BASICO OMETEPEC", "Venta": 2224.09, "Piezas": 114.0, "CajasEquiv": 4.75, "LiberaCajero": true, "PagoCajero": 114.0}, {"Supervisor": "Omar", "GrupoTienda": "CONVENIENCIA", "Tienda": "VIGS MENUDEO", "Venta": 2506.66, "Piezas": 110.0, "CajasEquiv": 4.5833333333, "LiberaCajero": true, "PagoCajero": 110.0}, {"Supervisor": "Alicia", "GrupoTienda": "AUTOSERVICIO BASICO", "Tienda": "VIGS BASICO CUAJI", "Venta": 2144.74, "Piezas": 106.0, "CajasEquiv": 4.4166666667, "LiberaCajero": true, "PagoCajero": 106.0}, {"Supervisor": "Omar", "GrupoTienda": "CONVENIENCIA", "Tienda": "VIGS LIBRAMIENTO", "Venta": 2378.99, "Piezas": 102.0, "CajasEquiv": 4.25, "LiberaCajero": true, "PagoCajero": 102.0}, {"Supervisor": "Alicia", "GrupoTienda": "AUTOSERVICIO BASICO", "Tienda": "VIGS BASICO JAMILTEPEC", "Venta": 1885.98, "Piezas": 84.0, "CajasEquiv": 3.5, "LiberaCajero": true, "PagoCajero": 84.0}, {"Supervisor": "Omar", "GrupoTienda": "CONVENIENCIA", "Tienda": "VIGS GAVIOTAS", "Venta": 1858.37, "Piezas": 82.0, "CajasEquiv": 3.4166666667, "LiberaCajero": true, "PagoCajero": 82.0}, {"Supervisor": "Omar", "GrupoTienda": "ABASTO", "Tienda": "VIGS CBTA", "Venta": 1822.16, "Piezas": 79.0, "CajasEquiv": 3.2916666667, "LiberaCajero": true, "PagoCajero": 79.0}, {"Supervisor": "Omar", "GrupoTienda": "ABASTO", "Tienda": "VIGS HACIENDA", "Venta": 1511.89, "Piezas": 65.0, "CajasEquiv": 2.7083333333, "LiberaCajero": true, "PagoCajero": 65.0}, {"Supervisor": "Alicia", "GrupoTienda": "AUTOSERVICIO", "Tienda": "VIGS PLAZA MERCADO", "Venta": 1463.58, "Piezas": 63.0, "CajasEquiv": 2.625, "LiberaCajero": true, "PagoCajero": 63.0}, {"Supervisor": "Erick", "GrupoTienda": "CONVENIENCIA", "Tienda": "VIGS BOULEVARD", "Venta": 1493.24, "Piezas": 60.0, "CajasEquiv": 2.5, "LiberaCajero": true, "PagoCajero": 60.0}, {"Supervisor": "Omar", "GrupoTienda": "ABASTO", "Tienda": "VIGS 5 DE MAYO", "Venta": 1194.69, "Piezas": 51.0, "CajasEquiv": 2.125, "LiberaCajero": true, "PagoCajero": 51.0}, {"Supervisor": "Erick", "GrupoTienda": "CONVENIENCIA", "Tienda": "VIGS GRANJAS DEL PESCADOR", "Venta": 1265.65, "Piezas": 50.0, "CajasEquiv": 2.0833333333, "LiberaCajero": true, "PagoCajero": 50.0}, {"Supervisor": "Erick", "GrupoTienda": "ABASTO", "Tienda": "VIGS RIO GRANDE", "Venta": 1213.82, "Piezas": 50.0, "CajasEquiv": 2.0833333333, "LiberaCajero": true, "PagoCajero": 50.0}, {"Supervisor": "Omar", "GrupoTienda": "CONVENIENCIA", "Tienda": "VIGS CUAJI", "Venta": 1120.63, "Piezas": 48.0, "CajasEquiv": 2.0, "LiberaCajero": true, "PagoCajero": 48.0}, {"Supervisor": "Omar", "GrupoTienda": "ABASTO", "Tienda": "COMERCIAL MENUDEO", "Venta": 1044.67, "Piezas": 46.0, "CajasEquiv": 1.9166666667, "LiberaCajero": true, "PagoCajero": 46.0}, {"Supervisor": "Erick", "GrupoTienda": "CONVENIENCIA", "Tienda": "VIGS PUERTO I", "Venta": 1013.89, "Piezas": 41.0, "CajasEquiv": 1.7083333333, "LiberaCajero": true, "PagoCajero": 41.0}, {"Supervisor": "Erick", "GrupoTienda": "CONVENIENCIA", "Tienda": "VIGS ZICATELA", "Venta": 1010.45, "Piezas": 40.0, "CajasEquiv": 1.6666666667, "LiberaCajero": true, "PagoCajero": 40.0}, {"Supervisor": "Omar", "GrupoTienda": "CONVENIENCIA", "Tienda": "VIGS CENTRO PINOTEPA", "Venta": 917.11, "Piezas": 40.0, "CajasEquiv": 1.6666666667, "LiberaCajero": true, "PagoCajero": 40.0}, {"Supervisor": "Omar", "GrupoTienda": "CONVENIENCIA", "Tienda": "VIGS AVENIDA JUAREZ", "Venta": 879.19, "Piezas": 38.0, "CajasEquiv": 1.5833333333, "LiberaCajero": true, "PagoCajero": 38.0}, {"Supervisor": "Omar", "GrupoTienda": "ABASTO", "Tienda": "VIGS CENTRAL", "Venta": 839.53, "Piezas": 37.0, "CajasEquiv": 1.5416666667, "LiberaCajero": true, "PagoCajero": 37.0}, {"Supervisor": "Erick", "GrupoTienda": "CONVENIENCIA", "Tienda": "VIGS PUERTO II", "Venta": 886.29, "Piezas": 36.0, "CajasEquiv": 1.5, "LiberaCajero": true, "PagoCajero": 36.0}, {"Supervisor": "Alicia", "GrupoTienda": "AUTOSERVICIO BASICO", "Tienda": "VIGS BASICO PUERTO ESCONDIDO", "Venta": 596.54, "Piezas": 30.0, "CajasEquiv": 1.25, "LiberaCajero": true, "PagoCajero": 30.0}, {"Supervisor": "Omar", "GrupoTienda": "CONVENIENCIA", "Tienda": "VIGS ALBOMONCI", "Venta": 615.42, "Piezas": 27.0, "CajasEquiv": 1.125, "LiberaCajero": true, "PagoCajero": 27.0}, {"Supervisor": "Omar", "GrupoTienda": "CONVENIENCIA", "Tienda": "VIGS ALVARO CARRILLO", "Venta": 591.31, "Piezas": 25.0, "CajasEquiv": 1.0416666667, "LiberaCajero": true, "PagoCajero": 25.0}, {"Supervisor": "Omar", "GrupoTienda": "CONVENIENCIA", "Tienda": "VIGS MARQUELIA", "Venta": 577.5, "Piezas": 25.0, "CajasEquiv": 1.0416666667, "LiberaCajero": true, "PagoCajero": 25.0}, {"Supervisor": "Erick", "GrupoTienda": "CONVENIENCIA", "Tienda": "VIGS PUERTO MERCADO", "Venta": 579.37, "Piezas": 23.0, "CajasEquiv": 0.9583333333, "LiberaCajero": false, "PagoCajero": 0.0}, {"Supervisor": "Erick", "GrupoTienda": "CONVENIENCIA", "Tienda": "VIGS PUERTO ADOQUIN", "Venta": 531.09, "Piezas": 21.0, "CajasEquiv": 0.875, "LiberaCajero": false, "PagoCajero": 0.0}, {"Supervisor": "Erick", "GrupoTienda": "ABASTO", "Tienda": "VIGS PUERTO CENTRAL", "Venta": 432.77, "Piezas": 18.0, "CajasEquiv": 0.75, "LiberaCajero": false, "PagoCajero": 0.0}, {"Supervisor": "Erick", "GrupoTienda": "CONVENIENCIA", "Tienda": "VIGS TONAMECA", "Venta": 417.28, "Piezas": 17.0, "CajasEquiv": 0.7083333333, "LiberaCajero": false, "PagoCajero": 0.0}, {"Supervisor": "Erick", "GrupoTienda": "ABASTO", "Tienda": "VIGS SAN JOSE DEL PROGRESO", "Venta": 256.86, "Piezas": 11.0, "CajasEquiv": 0.4583333333, "LiberaCajero": false, "PagoCajero": 0.0}, {"Supervisor": "Omar", "GrupoTienda": "ABASTO", "Tienda": "VIGS CACAHUATEPEC", "Venta": 231.0, "Piezas": 10.0, "CajasEquiv": 0.4166666667, "LiberaCajero": false, "PagoCajero": 0.0}, {"Supervisor": "Omar", "GrupoTienda": "MICRO", "Tienda": "VIGS MOVIL 002", "Venta": 224.16, "Piezas": 9.0, "CajasEquiv": 0.375, "LiberaCajero": false, "PagoCajero": 0.0}];
+const cabSupervisorData = [{"Supervisor": "Alicia", "Tiendas": 5, "TiendasLiberan": 5, "Piezas": 397.0, "Venta": 8314.93, "PagoCajeros": 397.0, "CoberturaPct": 1.0, "CajasEquiv": 16.5416666667, "BolsaA": 278, "BolsaB": 328, "BolsaC": 303}, {"Supervisor": "Erick", "Tiendas": 11, "TiendasLiberan": 6, "Piezas": 367.0, "Venta": 9100.71, "PagoCajeros": 277.0, "CoberturaPct": 0.5454545455, "CajasEquiv": 15.2916666667, "BolsaA": 333, "BolsaB": 303, "BolsaC": 318}, {"Supervisor": "Omar", "Tiendas": 18, "TiendasLiberan": 16, "Piezas": 1053.0, "Venta": 24490.79, "PagoCajeros": 1034.0, "CoberturaPct": 0.8888888889, "CajasEquiv": 43.875, "BolsaA": 889, "BolsaB": 869, "BolsaC": 879}];
+const cajasData = [{"Supervisor": "Clarissa", "Tienda": "BODEGA LA GUADALUPANA", "Grupo": "SURTETODO", "Vendedor": "VF10 - SURTE TODO FORANEO", "Venta": 6215.51, "Cajas": 18.0, "CumpleVendedor": false, "PagoVendedor": 0.0}, {"Supervisor": "Clarissa", "Tienda": "BODEGA LA GUADALUPANA", "Grupo": "AGENTES", "Vendedor": "VF02 - GREGORIO LIMONES HERNANDEZ", "Venta": 3165.52, "Cajas": 11.0, "CumpleVendedor": false, "PagoVendedor": 0.0}, {"Supervisor": "Clarissa", "Tienda": "BODEGA LA GUADALUPANA", "Grupo": "AGENTES", "Vendedor": "VF06 - WILLIAM BAUTISTA HERNANDEZ", "Venta": 924.16, "Cajas": 5.0, "CumpleVendedor": false, "PagoVendedor": 0.0}, {"Supervisor": "Alicia", "Tienda": "DIVITSA IV", "Grupo": "CAJERO", "Vendedor": "T25C1 - ERIKA HERNANDEZ ALAVEZ", "Venta": 589.65, "Cajas": 2.75, "CumpleVendedor": false, "PagoVendedor": 0.0}, {"Supervisor": "Alicia", "Tienda": "DIVITSA III", "Grupo": "CAJERO", "Vendedor": "T26C4 - JULIETA SANTIAGO DELGADO", "Venta": 850.86, "Cajas": 2.0, "CumpleVendedor": false, "PagoVendedor": 0.0}, {"Supervisor": "Alicia", "Tienda": "DIVITSA I", "Grupo": "CAJERO", "Vendedor": "T01M5 - MARIBEL RAMIREZ SANCHEZ", "Venta": 891.38, "Cajas": 2.0, "CumpleVendedor": false, "PagoVendedor": 0.0}, {"Supervisor": "Clarissa", "Tienda": "BODEGA LA GUADALUPANA", "Grupo": "SURTETODO", "Vendedor": "VF13 - SURTE TODO FORANEO 2", "Venta": 206.9, "Cajas": 2.0, "CumpleVendedor": false, "PagoVendedor": 0.0}, {"Supervisor": "Alicia", "Tienda": "DIVITSA I", "Grupo": "CAJERO", "Vendedor": "T01M9 - MERCEDES CRUZ GALLEGOS", "Venta": 455.18, "Cajas": 1.0, "CumpleVendedor": false, "PagoVendedor": 0.0}, {"Supervisor": "Alicia", "Tienda": "DIVITSA I", "Grupo": "TELEMARKETING", "Vendedor": "VM07 - SURTE TODO LOCAL 2", "Venta": 455.18, "Cajas": 1.0, "CumpleVendedor": false, "PagoVendedor": 0.0}, {"Supervisor": "Alicia", "Tienda": "DIVITSA II", "Grupo": "CAJERO", "Vendedor": "T08C8 - YUVIA ITZEL FRANCO AGUILAR", "Venta": 227.59, "Cajas": 0.5, "CumpleVendedor": false, "PagoVendedor": 0.0}];
+const routeSupervisorData = [{"Supervisor": "Alicia", "Equipo": 6, "Cumplen": 0, "Cajas": 9.25, "Venta": 3469.84, "PagoVendedor": 0.0, "CoberturaPct": 0.0, "LiberaSupervisor": false, "PagoSupervisor": 0.0}, {"Supervisor": "Clarissa", "Equipo": 4, "Cumplen": 0, "Cajas": 36.0, "Venta": 10512.09, "PagoVendedor": 0.0, "CoberturaPct": 0.0, "LiberaSupervisor": false, "PagoSupervisor": 0.0}];
+const saboresData = [{"Sabor": "Mora azul", "VentaPiezas": 9691.53, "Piezas": 433.0, "VentaCajas": 4665.52, "Cajas": 10.75, "CajasEquivPiezas": 18.0416666667, "CajasEquivTotal": 28.7916666667, "VentaTotal": 14357.05}, {"Sabor": "Frutos cítricos", "VentaPiezas": 8527.94, "Piezas": 379.0, "VentaCajas": 4668.11, "Cajas": 12.5, "CajasEquivPiezas": 15.7916666667, "CajasEquivTotal": 28.2916666667, "VentaTotal": 13196.05}, {"Sabor": "Mango maracuyá", "VentaPiezas": 8271.48, "Piezas": 318.0, "VentaCajas": 1641.39, "Cajas": 15.0, "CajasEquivPiezas": 13.25, "CajasEquivTotal": 28.25, "VentaTotal": 9912.87}, {"Sabor": "Frutos rojos", "VentaPiezas": 10824.35, "Piezas": 488.0, "VentaCajas": 3006.91, "Cajas": 7.0, "CajasEquivPiezas": 20.3333333333, "CajasEquivTotal": 27.3333333333, "VentaTotal": 13831.26}, {"Sabor": "Frutos verdes", "VentaPiezas": 4591.13, "Piezas": 199.0, "VentaCajas": 0.0, "Cajas": 0.0, "CajasEquivPiezas": 8.2916666667, "CajasEquivTotal": 8.2916666667, "VentaTotal": 4591.13}];
 
 const money = n => new Intl.NumberFormat('es-MX', { style:'currency', currency:'MXN', maximumFractionDigits:0 }).format(n || 0);
 const money2 = n => new Intl.NumberFormat('es-MX', { style:'currency', currency:'MXN', minimumFractionDigits:2, maximumFractionDigits:2 }).format(n || 0);
 const num = (n, d=0) => new Intl.NumberFormat('es-MX', { minimumFractionDigits:d, maximumFractionDigits:d }).format(n || 0);
+const pct = n => new Intl.NumberFormat('es-MX', {style:'percent', maximumFractionDigits:1}).format(n || 0);
 
 function selectMechanic(type){
   const isCab = type === 'cab';
@@ -326,110 +315,79 @@ function selectMechanic(type){
   document.getElementById('card-rutas').classList.toggle('active', !isCab);
   document.getElementById('panel-cab').classList.toggle('active', isCab);
   document.getElementById('panel-rutas').classList.toggle('active', !isCab);
-  document.getElementById('activeTitle').textContent = isCab ? 'Detalle CA&B' : 'Detalle Rutas / Mostradores';
+  document.getElementById('activeTitle').textContent = isCab ? 'Resultado CA&B' : 'Resultado Rutas / Mostradores';
   document.getElementById('activeCopy').textContent = isCab
-    ? '34 tiendas · 27 liberan · $1,708 pago cajeros'
-    : 'Rutas y Mostradores: pago por caja al vendedor con base mínima de 30 cajas; supervisor no libera por base del 40%.';
-  document.getElementById('activeTag').textContent = isCab ? 'Mecánica: CA&B' : 'Imagen seleccionada: Rutas / Mostradores';
+    ? '34 tiendas · 27 liberan · 1,817 piezas · $1,708 cajeros'
+    : '10 vendedores · 45.25 cajas · 0 cumplen · $0 pago';
+  document.getElementById('activeTag').textContent = isCab ? 'Mecánica: CA&B' : 'Mecánica: Rutas / Mostradores';
   document.getElementById('detalle').scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 function barChart(el, data, nameKey, valueKey, colorClass='', maxItems=10, formatFn=(x)=>num(x,0)){
-  const box = document.getElementById(el);
-  const sorted = [...data].sort((a,b)=>(b[valueKey]||0)-(a[valueKey]||0)).slice(0,maxItems);
-  const max = Math.max(...sorted.map(d=>d[valueKey]||0), 1);
-  box.innerHTML = sorted.map(d=>`
-    <div class="bar-item">
-      <div class="bar-name" title="${d[nameKey]}">${d[nameKey]}</div>
-      <div class="track"><div class="fill ${colorClass}" style="width:${Math.max(4, (d[valueKey]||0)/max*100)}%"></div></div>
-      <div class="bar-val">${formatFn(d[valueKey]||0)}</div>
-    </div>`).join('');
+  const box=document.getElementById(el); const sorted=[...data].sort((a,b)=>(b[valueKey]||0)-(a[valueKey]||0)).slice(0,maxItems);
+  const max=Math.max(...sorted.map(d=>d[valueKey]||0),1);
+  box.innerHTML=sorted.length?sorted.map(d=>`<div class="bar-item"><div class="bar-name" title="${d[nameKey]}">${d[nameKey]}</div><div class="track"><div class="fill ${colorClass}" style="width:${Math.max(4,(d[valueKey]||0)/max*100)}%"></div></div><div class="bar-val">${formatFn(d[valueKey]||0)}</div></div>`).join(''):'<div class="empty-state">Sin registros para el filtro.</div>';
+}
+
+function fillFilters(){
+  const cabSel=document.getElementById('cabSupervisorFilter');
+  [...new Set(piezasData.map(d=>d.Supervisor))].sort().forEach(s=>cabSel.insertAdjacentHTML('beforeend',`<option value="${s}">${s}</option>`));
+  const rs=document.getElementById('routeSupervisorFilter');
+  [...new Set(cajasData.map(d=>d.Supervisor))].sort().forEach(s=>rs.insertAdjacentHTML('beforeend',`<option value="${s}">${s}</option>`));
+  const rg=document.getElementById('routeGroupFilter');
+  [...new Set(cajasData.map(d=>d.Grupo))].sort().forEach(s=>rg.insertAdjacentHTML('beforeend',`<option value="${s}">${s}</option>`));
+}
+
+function currentCabData(){const s=document.getElementById('cabSupervisorFilter').value;return s==='all'?[...piezasData]:piezasData.filter(d=>d.Supervisor===s)}
+function allocationKey(){return {A:'BolsaA',B:'BolsaB',C:'BolsaC'}[document.getElementById('assumptionSelect').value]}
+function allocationLabel(){return {A:'Participación',B:'Volumen',C:'Mixto 50/50'}[document.getElementById('assumptionSelect').value]}
+
+function renderAssumption(){
+  const key=allocationKey(); const selected=document.getElementById('cabSupervisorFilter').value;
+  const eligible=cabSupervisorData.filter(d=>d.Supervisor!=='Sin asignar').sort((a,b)=>b[key]-a[key]);
+  document.getElementById('assumptionResult').innerHTML=`<div class="allocation-list">${eligible.map(d=>`<div class="allocation-row ${selected===d.Supervisor?'active':''}"><div><strong style="text-align:left;color:#fff">${d.Supervisor}</strong><br><span>${d.TiendasLiberan} tiendas · ${num(d.Piezas,0)} pzas.</span></div><span>${pct(d.CoberturaPct)}</span><strong>${money(d[key])}</strong></div>`).join('')}</div><div class="small-note">La bolsa completa se distribuye entre Alicia, Erick y Omar según el criterio seleccionado.</div>`;
+}
+
+function renderCab(){
+  const data=currentCabData(); const sup=document.getElementById('cabSupervisorFilter').value;
+  const tiendas=data.length, liberan=data.filter(d=>d.LiberaCajero).length, piezas=data.reduce((a,d)=>a+d.Piezas,0), pago=data.reduce((a,d)=>a+d.PagoCajero,0), noPiezas=data.filter(d=>!d.LiberaCajero).reduce((a,d)=>a+d.Piezas,0);
+  const supRow=cabSupervisorData.find(d=>d.Supervisor===sup); const bolsa=sup==='all'?1500:(supRow?supRow[allocationKey()]:0);
+  document.getElementById('cabTiendas').textContent=`${liberan}/${tiendas}`;
+  document.getElementById('cabPiezas').textContent=num(piezas,0); document.getElementById('cabPago').textContent=money(pago); document.getElementById('cabBolsa').textContent=money(bolsa);
+  document.getElementById('cabPaidPieces').textContent=num(pago,0); document.getElementById('cabNoPaidPieces').textContent=num(noPiezas,0);
+  document.getElementById('tagLib').textContent=`${liberan} liberan · ${tiendas-liberan} no liberan`;
+  document.getElementById('cabTableSummary').textContent=`${sup==='all'?'Todos los supervisores':sup} · ${tiendas} tiendas · ${num(piezas,0)} piezas · ${money(pago)} pago cajeros`;
+  barChart('barPiezas',data,'Tienda','Piezas','',10,x=>num(x,0)); renderPiezasTable(); renderAssumption();
+  document.getElementById('footerClose').innerHTML=`<strong>Cierre:</strong> pago total <span class="money">${money(totals.pago_total)}</span>: <span class="money">${money(totals.pago_cajeros)}</span> cajeros CA&B + <span class="money">$1,500</span> bolsa supervisor bajo criterio <strong>${allocationLabel()}</strong>. Rutas / Mostradores: <span class="money">$0</span>.`;
 }
 
 function renderPiezasTable(){
-  const q = document.getElementById('searchPiezas').value.toLowerCase().trim();
-  const filter = document.getElementById('filterPiezas').value;
-  const sort = document.getElementById('sortPiezas').value;
-  let data = [...piezasData];
-  if(q) data = data.filter(d => d.Tienda.toLowerCase().includes(q));
-  if(filter === 'ok') data = data.filter(d => d.LiberaCajero);
-  if(filter === 'no') data = data.filter(d => !d.LiberaCajero);
-  data.sort((a,b)=> (b[sort]||0) - (a[sort]||0));
-  document.getElementById('tablaPiezas').innerHTML = data.map(d=>`
-    <tr>
-      <td><strong>${d.Tienda}</strong></td>
-      <td class="num">${money2(d.Venta)}</td>
-      <td class="num">${num(d.Piezas,0)}</td>
-      <td class="num">${num(d.CajasEquiv,2)}</td>
-      <td>${d.LiberaCajero ? '<span class="pill ok">Libera pago</span>' : '<span class="pill no">No libera</span>'}</td>
-      <td class="num money">${money(d.PagoCajero)}</td>
-    </tr>`).join('');
+  const q=document.getElementById('searchPiezas').value.toLowerCase().trim(), filter=document.getElementById('filterPiezas').value, sort=document.getElementById('sortPiezas').value;
+  let data=currentCabData(); if(q)data=data.filter(d=>d.Tienda.toLowerCase().includes(q)); if(filter==='ok')data=data.filter(d=>d.LiberaCajero); if(filter==='no')data=data.filter(d=>!d.LiberaCajero); data.sort((a,b)=>(b[sort]||0)-(a[sort]||0));
+  document.getElementById('tablaPiezas').innerHTML=data.map(d=>`<tr><td><strong>${d.Supervisor}</strong></td><td>${d.GrupoTienda}</td><td><strong>${d.Tienda}</strong></td><td class="num">${money2(d.Venta)}</td><td class="num">${num(d.Piezas,0)}</td><td class="num">${num(d.CajasEquiv,2)}</td><td>${d.LiberaCajero?'<span class="pill ok">Libera pago</span>':'<span class="pill no">No libera</span>'}</td><td class="num money">${money(d.PagoCajero)}</td></tr>`).join('');
 }
 
-function renderCajasTable(){
-  const sorted = [...cajasData].sort((a,b)=>b.Cajas-a.Cajas);
-  document.getElementById('tablaCajas').innerHTML = sorted.map(d=>`
-    <tr>
-      <td><strong>${d.Tienda}</strong></td>
-      <td class="num">${money2(d.Venta)}</td>
-      <td class="num">${num(d.Cajas,2)}</td>
-      <td>${d.CumpleVendedor ? '<span class="pill ok">Libera vendedor</span>' : '<span class="pill no">No libera</span>'}</td>
-      <td class="num money">${money(d.PagoVendedor)}</td>
-    </tr>`).join('');
+function currentRouteData(){const s=document.getElementById('routeSupervisorFilter').value,g=document.getElementById('routeGroupFilter').value;return cajasData.filter(d=>(s==='all'||d.Supervisor===s)&&(g==='all'||d.Grupo===g))}
+function renderRouteSupervisor(){
+  const selected=document.getElementById('routeSupervisorFilter').value; let data=routeSupervisorData; if(selected!=='all')data=data.filter(d=>d.Supervisor===selected);
+  document.getElementById('routeSupervisorResult').innerHTML=`<div class="metric-stack">${data.map(d=>`<div class="allocation-row"><div><strong style="text-align:left;color:#fff">${d.Supervisor}</strong><br><span>${d.Cumplen} de ${d.Equipo} vendedores</span></div><span>${pct(d.CoberturaPct)}</span><strong>${money(d.PagoSupervisor)}</strong></div>`).join('')}</div><div class="small-note">Base: 40% del equipo con mínimo 30 cajas. Ningún supervisor libera pago.</div>`;
 }
+function renderRoutes(){
+  const data=currentRouteData(), sellers=data.length, cajas=data.reduce((a,d)=>a+d.Cajas,0), cumplen=data.filter(d=>d.CumpleVendedor).length, pago=data.reduce((a,d)=>a+d.PagoVendedor,0);
+  document.getElementById('rutMostradores').textContent=num(sellers,0);document.getElementById('rutCajas').textContent=num(cajas,2);document.getElementById('rutLib').textContent=`${cumplen}/${sellers}`;document.getElementById('rutPago').textContent=money(pago);
+  const s=document.getElementById('routeSupervisorFilter').value,g=document.getElementById('routeGroupFilter').value;
+  document.getElementById('routeTableSummary').textContent=`${s==='all'?'Todos los supervisores':s} · ${g==='all'?'Todos los grupos':g} · ${sellers} vendedores · ${num(cajas,2)} cajas`;
+  document.getElementById('routeTag').textContent=`${cumplen} cumplen · ${sellers-cumplen} no cumplen`;
+  barChart('barCajas',data,'Vendedor','Cajas','blue',10,x=>num(x,2)); renderCajasTable(); renderRouteSupervisor();
+}
+function renderCajasTable(){const data=[...currentRouteData()].sort((a,b)=>b.Cajas-a.Cajas);document.getElementById('tablaCajas').innerHTML=data.map(d=>`<tr><td><strong>${d.Supervisor}</strong></td><td>${d.Grupo}</td><td><strong>${d.Vendedor}</strong></td><td>${d.Tienda}</td><td class="num">${money2(d.Venta)}</td><td class="num">${num(d.Cajas,2)}</td><td>${d.CumpleVendedor?'<span class="pill ok">Cumple</span>':'<span class="pill no">No cumple</span>'}</td><td class="num money">${money(d.PagoVendedor)}</td></tr>`).join('')}
 
-function renderSabores(){
-  const sorted = [...saboresData].sort((a,b)=>b.CajasEquivTotal-a.CajasEquivTotal);
-  document.getElementById('tablaSabores').innerHTML = sorted.map(d=>`
-    <tr>
-      <td><strong>${d.Sabor}</strong></td>
-      <td class="num">${money2(d.VentaTotal)}</td>
-      <td class="num">${num(d.Piezas,0)}</td>
-      <td class="num">${num(d.Cajas,2)}</td>
-      <td class="num">${num(d.CajasEquivTotal,2)}</td>
-    </tr>`).join('');
-}
-
-function renderAssumption(){
-  const v = document.getElementById('assumptionSelect').value;
-  const info = {
-    A: ['Supuesto A · Participación', 'Criterio: tiendas participantes; desempate por volumen.'],
-    B: ['Supuesto B · Volumen', 'Criterio: volumen; desempate por tiendas participantes.'],
-    C: ['Supuesto C · Score 50/50', 'Criterio: 50% participación y 50% volumen.']
-  }[v];
-  document.getElementById('assumptionResult').innerHTML = `
-    <span class="tag warn">${info[0]}</span>
-    <p class="note" style="margin-top:10px">${info[1]}</p>
-    <p class="note" style="margin-top:10px"><strong>Resultado:</strong> pendiente mapeo supervisor-tienda. Premio potencial: <span class="money">$1,500</span>.</p>`;
-}
+function renderSabores(){const sorted=[...saboresData].sort((a,b)=>b.CajasEquivTotal-a.CajasEquivTotal);document.getElementById('tablaSabores').innerHTML=sorted.map(d=>`<tr><td><strong>${d.Sabor}</strong></td><td class="num">${money2(d.VentaTotal)}</td><td class="num">${num(d.Piezas,0)}</td><td class="num">${num(d.Cajas,2)}</td><td class="num">${num(d.CajasEquivTotal,2)}</td></tr>`).join('')}
 
 function init(){
-  document.getElementById('kpiVentaTotal').textContent = money(totals.venta_total);
-  document.getElementById('kpiVolumen').textContent = num(totals.cajas_equiv_total, 2);
-  document.getElementById('kpiPagoBase').textContent = money(totals.pago_base);
-  document.getElementById('kpiPagoPotencial').textContent = money(totals.pago_potencial_sup);
-  document.getElementById('footPago').textContent = money(totals.pago_base);
-
-  document.getElementById('cabTiendas').textContent = `${totals.tiendas_piezas_liberadas}/${totals.tiendas_piezas}`;
-  document.getElementById('cabPiezas').textContent = num(totals.piezas,0);
-  document.getElementById('cabPago').textContent = money(totals.pago_cajeros);
-  document.getElementById('cabNoLib').textContent = totals.tiendas_piezas_no_liberadas;
-  document.getElementById('cabPaidPieces').textContent = num(totals.pago_cajeros,0);
-  document.getElementById('cabNoPaidPieces').textContent = num(totals.piezas_no_liberadas,0);
-  document.getElementById('tagLib').textContent = `${totals.tiendas_piezas_liberadas} liberan · ${totals.tiendas_piezas_no_liberadas} no liberan`;
-
-  document.getElementById('rutMostradores').textContent = totals.mostradores;
-  document.getElementById('rutCajas').textContent = num(totals.cajas,2);
-  document.getElementById('rutLib').textContent = totals.mostradores_liberados;
-  document.getElementById('rutPago').textContent = money(totals.pago_vendedor);
-
-  barChart('barPiezas', piezasData, 'Tienda', 'Piezas', '', 10, x=>num(x,0));
-  barChart('barCajas', cajasData, 'Tienda', 'Cajas', 'blue', 8, x=>num(x,2));
-  barChart('barSabores', saboresData, 'Sabor', 'CajasEquivTotal', 'purple', 8, x=>num(x,2));
-  renderPiezasTable();
-  renderCajasTable();
-  renderSabores();
-  renderAssumption();
+  fillFilters();
+  document.getElementById('kpiVentaTotal').textContent=money(totals.venta_total);document.getElementById('kpiVolumen').textContent=num(totals.cajas_equiv_total,2);document.getElementById('kpiPagoBase').textContent=money(totals.pago_base);document.getElementById('kpiPagoPotencial').textContent=money(totals.pago_total);
+  barChart('barSabores',saboresData,'Sabor','CajasEquivTotal','purple',8,x=>num(x,2));renderSabores();renderCab();renderRoutes();
 }
 init();
 </script>
